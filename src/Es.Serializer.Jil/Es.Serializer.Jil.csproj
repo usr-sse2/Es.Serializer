@@ -4,14 +4,13 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{65FF816A-7D80-45C7-B7FF-AEE1CFB90A02}</ProjectGuid>
+    <ProjectGuid>{7869AB00-FB94-4E86-90E6-CCBB7278607C}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SerializerTest</RootNamespace>
-    <AssemblyName>SerializerTest</AssemblyName>
+    <RootNamespace>Es.Serializer</RootNamespace>
+    <AssemblyName>Es.Serializer.Jil</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -21,7 +20,6 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -30,15 +28,14 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="nunit.framework, Version=2.6.4.14350, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
-      <HintPath>..\packages\NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
+    <Reference Include="Jil, Version=2.10.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Jil.2.10.0\lib\net45\Jil.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="protobuf-net, Version=2.0.0.668, Culture=neutral, PublicKeyToken=257b51d87d2e4d67, processorArchitecture=MSIL">
-      <HintPath>..\packages\protobuf-net.2.0.0.668\lib\net40\protobuf-net.dll</HintPath>
+    <Reference Include="Sigil, Version=4.4.0.0, Culture=neutral, PublicKeyToken=2d06c3494341c8ab, processorArchitecture=MSIL">
+      <HintPath>..\packages\Sigil.4.4.0\lib\net45\Sigil.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -52,39 +49,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BinarySerializerTest.cs" />
-    <Compile Include="JilSerializerTest.cs" />
-    <Compile Include="JsonNetSerializerTest.cs" />
-    <Compile Include="ObjectSerializerTest.cs" />
+    <Compile Include="JilSerializer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Foo.cs" />
-    <Compile Include="TestHelper.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Es.Serializer.Jil\Es.Serializer.Jil.csproj">
-      <Project>{7869ab00-fb94-4e86-90e6-ccbb7278607c}</Project>
-      <Name>Es.Serializer.Jil</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Es.Serializer.JsonNet\Es.Serializer.JsonNet.csproj">
-      <Project>{fe958d7a-c47d-4656-a850-29f9818d5138}</Project>
-      <Name>Es.Serializer.JsonNet</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Es.Serializer.ProtoBuf\Es.Serializer.ProtoBuf.csproj">
-      <Project>{0f4b7af3-c13c-4cfe-b853-cac0e5158b89}</Project>
-      <Name>Es.Serializer.ProtoBuf</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Es.Serializer\Es.Serializer.csproj">
       <Project>{0cde4ee6-18c7-45bd-89f5-e69a01ef62c9}</Project>
       <Name>Es.Serializer</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config">
-      <SubType>Designer</SubType>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

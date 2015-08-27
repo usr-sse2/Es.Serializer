@@ -36,10 +36,10 @@ namespace Es.Serializer
         /// <summary>
         /// Deserializes from string.
         /// </summary>
-        /// <param name="serializedText">The serialized text.</param>
         /// <param name="type">The type.</param>
+        /// <param name="serializedText">The serialized text.</param>
         /// <returns>System.Object.</returns>
-        object DeserializeFromString(string serializedText, Type type);
+        object DeserializeFromString(Type type, string serializedText);
 
         /// <summary>
         /// Serializes to string.
