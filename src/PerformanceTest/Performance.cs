@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Es.Serializer;
 
 namespace PerformanceTest
@@ -33,21 +32,42 @@ namespace PerformanceTest
         [Test("Serializers Performance Test")]
         public void SerializersTest() {
 
+            Process.GetCurrentProcess().ProcessorAffinity = (IntPtr)1;
+
             const int runs = 10000;
 
-            Console.WriteLine("\tJil\t\tJsonNet\t\tProtobuf\tXml\t\tBinary\t\tSoap\t\tDataContract");
+            Console.WriteLine("Jil\t\tJsonNet\t\tProtobuf\tXml\t\tBinary\t\tSoap\t\tDataContract");
 
             var foo = Helper.GetFoo();
 
             double[] speeds = CompareSerializers(foo, runs);
 
-            Console.WriteLine("single\t" + string.Join("\t\t", Enumerable.Range(0, serializer.Count).Select(s => "{" + s + "}")),
+            Console.WriteLine(string.Join("\t\t", Enumerable.Range(0, serializer.Count).Select(s => "{" + s + "}")),
+                speeds.Select(s => s.ToString()).ToArray());
+
+        }
+
+        [Test("Deserialize Performance Test")]
+        public void CompareDeserializes() {
+
+            Process.GetCurrentProcess().ProcessorAffinity = (IntPtr)1;
+
+            const int runs = 10000;
+
+            Console.WriteLine("Jil\t\tJsonNet\t\tProtobuf\tXml\t\tBinary\t\tSoap\t\tDataContract");
+
+            var foo = Helper.GetFoo();
+            
+            double[] speeds = CompareDeserializes(foo, runs);
+
+            Console.WriteLine(string.Join("\t\t", Enumerable.Range(0, serializer.Count).Select(s => "{" + s + "}")),
                 speeds.Select(s => s.ToString()).ToArray());
 
         }
 
         double[] CompareSerializers<T>(T obj, int runs) {
             double[] ret = new double[serializer.Count];
+
 
             //warm-up
             jilserializer.SerializeToString(obj);
@@ -69,42 +89,42 @@ namespace PerformanceTest
             var keys = serializer.Keys.ToList();
 
             serializer["Jil"] = () =>
+            {
+                GC.Collect(2, GCCollectionMode.Forced, blocking: true);
+                ret[keys.IndexOf("Jil")] = Helper.AverageRuntime(() =>
                 {
-                    GC.Collect(2, GCCollectionMode.Forced, blocking: true);
-                    ret[keys.IndexOf("Jil")] = Helper.AverageRuntime(() =>
-                    {
-                        jilserializer.SerializeToString(obj);
-                    }, runs);
-                };
+                    jilserializer.SerializeToString(obj);
+                }, runs);
+            };
 
             serializer["Json"] = () =>
-               {
-                   GC.Collect(2, GCCollectionMode.Forced, blocking: true);
-                   ret[keys.IndexOf("Json")] = Helper.AverageRuntime(() =>
-                   {
-                       jsonnetserializer.SerializeToString(obj);
-                   }, runs);
-               };
-
-            serializer["Protobuf"] = () =>
+            {
+                GC.Collect(2, GCCollectionMode.Forced, blocking: true);
+                ret[keys.IndexOf("Json")] = Helper.AverageRuntime(() =>
                 {
-                    GC.Collect(2, GCCollectionMode.Forced, blocking: true);
-                    ret[keys.IndexOf("Protobuf")] = Helper.AverageRuntime(() =>
-                    {
-                        using (MemoryStream mem = new MemoryStream()) {
-                            protobufserializer.Serialize(obj, mem);
-                        }
-                    }, runs);
-                };
+                    jsonnetserializer.SerializeToString(obj);
+                }, runs);
+            };
 
             serializer["Xml"] = () =>
-              {
-                  GC.Collect(2, GCCollectionMode.Forced, blocking: true);
-                  ret[keys.IndexOf("Xml")] = Helper.AverageRuntime(() =>
-                  {
-                      xmlserializer.SerializeToString(obj);
-                  }, runs);
-              };
+            {
+                GC.Collect(2, GCCollectionMode.Forced, blocking: true);
+                ret[keys.IndexOf("Xml")] = Helper.AverageRuntime(() =>
+                {
+                    xmlserializer.SerializeToString(obj);
+                }, runs);
+            };
+
+            serializer["Protobuf"] = () =>
+            {
+                GC.Collect(2, GCCollectionMode.Forced, blocking: true);
+                ret[keys.IndexOf("Protobuf")] = Helper.AverageRuntime(() =>
+                {
+                    using (MemoryStream mem = new MemoryStream()) {
+                        protobufserializer.Serialize(obj, mem);
+                    }
+                }, runs);
+            };
 
             serializer["Binary"] = () =>
             {
@@ -145,32 +165,114 @@ namespace PerformanceTest
             });
 
             return ret;
+        }
 
-            //var allRuns = new List<double[]>();
+        double[] CompareDeserializes<T>(T obj, int runs) {
+            double[] ret = new double[serializer.Count];
 
-            //foreach (var perm in Helper.Permutate(ret.Length)) {
-            //    ret = new double[ret.Length];
-            //    foreach (var index in perm) {
-            //        serializer[keys[index]]();
-            //    }
-            //    allRuns.Add(ret);
-            //}
+            var objType = obj.GetType();
 
-            //var medians = new double[ret.Length];
+            //warm-up
+            var jilSerializedText = jilserializer.SerializeToString(obj);
+            var jsonnetSerializedText = jsonnetserializer.SerializeToString(obj);
+            var xmlSerializedText = xmlserializer.SerializeToString(obj);
+            byte[] protobufData, binaryData, dataContractData, soapData;
+            using (MemoryStream mem = new MemoryStream()) {
+                protobufserializer.Serialize(obj, mem);
+                protobufData = mem.ToArray();
+            }
+            using (MemoryStream mem = new MemoryStream()) {
+                binaryserializer.Serialize(obj, mem);
+                binaryData = mem.ToArray();
+            }
+            using (MemoryStream mem = new MemoryStream()) {
+                datacontractserializer.Serialize(obj, mem);
+                dataContractData = mem.ToArray();
+            }
+            using (MemoryStream mem = new MemoryStream()) {
+                soapserializer.Serialize(obj, mem);
+                soapData = mem.ToArray();
+            }
 
-            //for (var i = 0; i < ret.Length; i++) {
-            //    var allForIndex = allRuns.Select(run => run[i])
-            //        .OrderBy(_ => _).ToArray();
+            var keys = serializer.Keys.ToList();
 
-            //    if (allForIndex.Length % 2 == 1) {
-            //        medians[i] = allForIndex[allForIndex.Length / 2];
-            //    }
-            //    else {
-            //        medians[i] = (allForIndex[allForIndex.Length / 2 - 1] + allForIndex[allForIndex.Length / 2]) / 2.0;
-            //    }
-            //}
+            serializer["Jil"] = () =>
+            {
+                GC.Collect(2, GCCollectionMode.Forced, blocking: true);
+                ret[keys.IndexOf("Jil")] = Helper.AverageRuntime(() =>
+                {
+                    jilserializer.DeserializeFromString(jilSerializedText, objType);
+                }, runs);
+            };
 
-            //return medians;
+            serializer["Json"] = () =>
+            {
+                GC.Collect(2, GCCollectionMode.Forced, blocking: true);
+                ret[keys.IndexOf("Json")] = Helper.AverageRuntime(() =>
+                {
+                    jsonnetserializer.DeserializeFromString(jsonnetSerializedText, objType);
+                }, runs);
+            };
+
+            serializer["Xml"] = () =>
+            {
+                GC.Collect(2, GCCollectionMode.Forced, blocking: true);
+                ret[keys.IndexOf("Xml")] = Helper.AverageRuntime(() =>
+                {
+                    xmlserializer.DeserializeFromString(xmlSerializedText, objType);
+                }, runs);
+            };
+
+            serializer["Protobuf"] = () =>
+            {
+                GC.Collect(2, GCCollectionMode.Forced, blocking: true);
+                ret[keys.IndexOf("Protobuf")] = Helper.AverageRuntime(() =>
+                {
+                    using (MemoryStream mem = new MemoryStream(protobufData)) {
+                        protobufserializer.Deserialize(mem, objType);
+                    }
+                }, runs);
+            };
+
+            serializer["Binary"] = () =>
+            {
+                GC.Collect(2, GCCollectionMode.Forced, blocking: true);
+                ret[keys.IndexOf("Binary")] = Helper.AverageRuntime(() =>
+                {
+                    using (MemoryStream mem = new MemoryStream(binaryData)) {
+                        binaryserializer.Deserialize(mem, objType);
+                    }
+                }, runs);
+            };
+
+            serializer["Soap"] = () =>
+            {
+                GC.Collect(2, GCCollectionMode.Forced, blocking: true);
+                ret[keys.IndexOf("Soap")] = Helper.AverageRuntime(() =>
+                {
+                    using (MemoryStream mem = new MemoryStream(soapData)) {
+                        soapserializer.Deserialize(mem, objType);
+                    }
+                }, runs);
+            };
+
+            serializer["DataContract"] = () =>
+            {
+                GC.Collect(2, GCCollectionMode.Forced, blocking: true);
+                ret[keys.IndexOf("DataContract")] = Helper.AverageRuntime(() =>
+                {
+                    using (MemoryStream mem = new MemoryStream(dataContractData)) {
+                        datacontractserializer.Deserialize(mem, objType);
+                    }
+                }, runs);
+            };
+
+            keys.ForEach(k =>
+            {
+                serializer[k]();
+            });
+
+            return ret;
         }
     }
 }
