@@ -21,6 +21,12 @@ namespace PerformanceTest
             return watch.ElapsedMilliseconds / (double)runs;
         }
 
+        internal static IEnumerable<int[]> Permutate(int upTo) {
+            var asArr = Enumerable.Range(0, upTo);
+
+            return Permutate(asArr.ToArray());
+        }
+
         internal static IEnumerable<T[]> Permutate<T>(T[] array) {
             if (array == null || array.Length == 0) {
                 yield return new T[0];
@@ -48,7 +54,7 @@ namespace PerformanceTest
                 Id = 1,
                 Name = "John",
                 Age = 30,
-                Date = DateTime.UtcNow,
+                Date = DateTime.Now,
                 Sex = true,
                 Xuid = Guid.NewGuid(),
                 UserStatus = UserStatus.Approved,
