@@ -27,7 +27,7 @@ namespace Es.Serializer
             serializer.Serialize(writer, value);
         }
 
-        protected override object DeserializeCore(Type type, TextReader reader) {
+        protected override object DeserializeCore(TextReader reader, Type type) {
             JsonSerializer serializer = JsonSerializer.Create();
             return serializer.Deserialize(reader, type);
         }

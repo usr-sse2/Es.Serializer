@@ -25,7 +25,7 @@ namespace Es.Serializer
         public object Deserialize(Stream stream, Type type) {
             var genericType = _method.MakeGenericMethod(type);
 
-            return genericType.Invoke(this, new[] { stream }); ;
+            return genericType.Invoke(this, new[] { stream });
         }
     }
 }

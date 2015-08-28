@@ -50,25 +50,25 @@ namespace Es.Serializer
         /// <summary>
         /// Deserializes the specified type.
         /// </summary>
-        /// <param name="type">The type.</param>
         /// <param name="data">The data.</param>
+        /// <param name="type">The type.</param>
         /// <returns>System.Object.</returns>
-        object Deserialize(Type type, byte[] data);
+        object Deserialize(byte[] data, Type type);
 
         /// <summary>
         /// Deserializes the specified type.
         /// </summary>
-        /// <param name="type">The type.</param>
         /// <param name="stream">The stream.</param>
+        /// <param name="type">The type.</param>
         /// <returns>System.Object.</returns>
-        object Deserialize(Type type, Stream stream);
+        object Deserialize(Stream stream, Type type);
 
         /// <summary>
         /// Deserializes the specified type.
         /// </summary>
-        /// <param name="type">The type.</param>
         /// <param name="reader">The reader.</param>
+        /// <param name="type">The type.</param>
         /// <returns>System.Object.</returns>
-        object Deserialize(Type type, TextReader reader);
+        object Deserialize(TextReader reader, Type type);
     }
 }

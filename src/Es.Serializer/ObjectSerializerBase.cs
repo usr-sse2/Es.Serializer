@@ -47,41 +47,41 @@ namespace Es.Serializer
         /// <summary>
         /// Deserializes the core.
         /// </summary>
-        /// <param name="type">The type.</param>
         /// <param name="reader">The reader.</param>
+        /// <param name="type">The type.</param>
         /// <returns>System.Object.</returns>
-        protected abstract object DeserializeCore(Type type, TextReader reader);
+        protected abstract object DeserializeCore(TextReader reader, Type type);
 
         /// <summary>
         /// Deserializes the specified type.
         /// </summary>
-        /// <param name="type">The type.</param>
         /// <param name="reader">The reader.</param>
+        /// <param name="type">The type.</param>
         /// <returns>System.Object.</returns>
-        public object Deserialize(Type type, TextReader reader) {
-            return DeserializeCore(type, reader);
+        public object Deserialize(TextReader reader, Type type) {
+            return DeserializeCore(reader, type);
         }
 
         /// <summary>
         /// Deserializes the specified type.
         /// </summary>
-        /// <param name="type">The type.</param>
         /// <param name="stream">The stream.</param>
+        /// <param name="type">The type.</param>
         /// <returns>System.Object.</returns>
-        public virtual object Deserialize(Type type, Stream stream) {
+        public virtual object Deserialize(Stream stream, Type type) {
             using (StreamReader reader = new StreamReader(stream, _encoding, true, bufferSize, true))
-                return Deserialize(type, reader);
+                return Deserialize(reader, type);
         }
 
         /// <summary>
         /// Deserializes the specified type.
         /// </summary>
-        /// <param name="type">The type.</param>
         /// <param name="data">The data.</param>
+        /// <param name="type">The type.</param>
         /// <returns>System.Object.</returns>
-        public virtual object Deserialize(Type type, byte[] data) {
+        public virtual object Deserialize(byte[] data, Type type) {
             using (var mem = new MemoryStream(data)) {
-                return Deserialize(type, mem);
+                return Deserialize(mem, type);
             }
         }
 
@@ -123,18 +123,18 @@ namespace Es.Serializer
         /// <param name="serializedText">The serialized text.</param>
         /// <returns>To.</returns>
         public To DeserializeFromString<To>(string serializedText) {
-            return (To)DeserializeFromString(typeof(To), serializedText);
+            return (To)DeserializeFromString(serializedText, typeof(To));
         }
 
         /// <summary>
         /// Deserializes from string.
         /// </summary>
-        /// <param name="type">The type.</param>
         /// <param name="serializedText">The serialized text.</param>
+        /// <param name="type">The type.</param>
         /// <returns>System.Object.</returns>
-        public virtual object DeserializeFromString(Type type, string serializedText) {
+        public virtual object DeserializeFromString(string serializedText, Type type) {
             using (StringReader reader = new StringReader(serializedText)) {
-                return DeserializeCore(type, reader);
+                return DeserializeCore(reader, type);
             }
         }
 

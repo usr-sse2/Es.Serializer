@@ -14,11 +14,11 @@ namespace Es.Serializer
             Jil.JSON.Serialize(value, writer, opt);
         }
 
-        protected override object DeserializeCore(Type type, TextReader reader) {
+        protected override object DeserializeCore(TextReader reader, Type type) {
             return Jil.JSON.Deserialize(reader, type, opt);
         }
 
-        public override object DeserializeFromString(Type type, string serializedText) {
+        public override object DeserializeFromString(string serializedText, Type type) {
             return Jil.JSON.Deserialize(serializedText, type, opt);
         }
 

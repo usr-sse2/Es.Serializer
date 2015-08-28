@@ -16,7 +16,6 @@
 using System;
 using System.IO;
 using System.Xml;
-using System.Xml.Serialization;
 
 /// <summary>
 /// The Serializer namespace.
@@ -52,10 +51,10 @@ namespace Es.Serializer
         /// <summary>
         /// Deserializes the specified type.
         /// </summary>
-        /// <param name="type">The type.</param>
         /// <param name="stream">The stream.</param>
+        /// <param name="type">The type.</param>
         /// <returns>System.Object.</returns>
-        public override object Deserialize(Type type, Stream stream) {
+        public override object Deserialize(Stream stream, Type type) {
             System.Xml.Serialization.XmlSerializer serializer = new System.Xml.Serialization.XmlSerializer(type);
             return serializer.Deserialize(stream);
         }
@@ -75,10 +74,10 @@ namespace Es.Serializer
         /// <summary>
         /// Deserializes the core.
         /// </summary>
-        /// <param name="type">The type.</param>
         /// <param name="reader">The reader.</param>
+        /// <param name="type">The type.</param>
         /// <returns>System.Object.</returns>
-        protected override object DeserializeCore(Type type, TextReader reader) {
+        protected override object DeserializeCore(TextReader reader, Type type) {
             System.Xml.Serialization.XmlSerializer serializer = new System.Xml.Serialization.XmlSerializer(type);
             return serializer.Deserialize(reader);
         }

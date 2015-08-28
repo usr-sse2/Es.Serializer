@@ -42,6 +42,8 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Runtime.Serialization.Formatters.Soap" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -50,18 +52,32 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Foo.cs" />
+    <Compile Include="Helper.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Performance.cs" />
     <Compile Include="TestExcute.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Es.Serializer.Jil\Es.Serializer.Jil.csproj">
+      <Project>{7869ab00-fb94-4e86-90e6-ccbb7278607c}</Project>
+      <Name>Es.Serializer.Jil</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Es.Serializer.JsonNet\Es.Serializer.JsonNet.csproj">
+      <Project>{fe958d7a-c47d-4656-a850-29f9818d5138}</Project>
+      <Name>Es.Serializer.JsonNet</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Es.Serializer.ProtoBuf\Es.Serializer.ProtoBuf.csproj">
+      <Project>{0f4b7af3-c13c-4cfe-b853-cac0e5158b89}</Project>
+      <Name>Es.Serializer.ProtoBuf</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Es.Serializer\Es.Serializer.csproj">
       <Project>{0cde4ee6-18c7-45bd-89f5-e69a01ef62c9}</Project>
       <Name>Es.Serializer</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
