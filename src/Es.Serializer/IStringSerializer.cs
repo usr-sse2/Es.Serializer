@@ -25,13 +25,13 @@ namespace Es.Serializer
     /// </summary>
     public interface IStringSerializer
     {
-        /// <summary>
-        /// Deserializes from string.
-        /// </summary>
-        /// <typeparam name="To">The type of to.</typeparam>
-        /// <param name="serializedText">The serialized text.</param>
-        /// <returns>To.</returns>
-        To DeserializeFromString<To>(string serializedText);
+        ///// <summary>
+        ///// Deserializes from string.
+        ///// </summary>
+        ///// <typeparam name="To">The type of to.</typeparam>
+        ///// <param name="serializedText">The serialized text.</param>
+        ///// <returns>To.</returns>
+        //To DeserializeFromString<To>(string serializedText);
 
         /// <summary>
         /// Deserializes from string.
@@ -44,9 +44,8 @@ namespace Es.Serializer
         /// <summary>
         /// Serializes to string.
         /// </summary>
-        /// <typeparam name="TFrom">The type of the TFrom.</typeparam>
-        /// <param name="from">From.</param>
+        /// <param name="value">the value.</param>
         /// <returns>System.String.</returns>
-        string SerializeToString<TFrom>(TFrom from);
+        string SerializeToString(object value);
     }
 }

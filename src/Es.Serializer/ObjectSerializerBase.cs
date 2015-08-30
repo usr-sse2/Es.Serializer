@@ -25,7 +25,7 @@ namespace Es.Serializer
     /// <summary>
     /// Class ObjectSerializerBase.
     /// </summary>
-    public abstract class ObjectSerializerBase : IObjectSerializer, IStringSerializer
+    public abstract class ObjectSerializerBase : IObjectSerializer, IBinarySerializer, IStringSerializer
     {
         /// <summary>
         /// The buffer size
@@ -141,12 +141,11 @@ namespace Es.Serializer
         /// <summary>
         /// Serializes to string.
         /// </summary>
-        /// <typeparam name="TFrom">The type of the TFrom.</typeparam>
-        /// <param name="from">From.</param>
+        /// <param name="value">The value.</param>
         /// <returns>System.String.</returns>
-        public virtual string SerializeToString<TFrom>(TFrom from) {
+        public virtual string SerializeToString(object value) {
             using (StringWriter writer = new StringWriter()) {
-                SerializeCore(from, writer);
+                SerializeCore(value, writer);
                 return writer.ToString();
             }
         }

@@ -22,8 +22,8 @@ namespace Es.Serializer
             return Jil.JSON.Deserialize(serializedText, type, opt);
         }
 
-        public override string SerializeToString<TFrom>(TFrom from) {
-            return Jil.JSON.Serialize(from, opt);
+        public override string SerializeToString(object value) {
+            return Jil.JSON.Serialize(value, opt);
         }
     }
 }

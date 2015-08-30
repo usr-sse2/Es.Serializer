@@ -1,31 +1,25 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
-using System.Reflection;
+using ProtoBuf.Meta;
 
 namespace Es.Serializer
 {
-    public class ProtoBufSerializer : IBinarySerializer
+    public class ProtoBufSerializer : ObjectSerializerBase
     {
-        private readonly MethodInfo _method;
-
-        public ProtoBufSerializer() {
-            _method = GetType().GetMethods()
-                .FirstOrDefault(w => w.Name == "Deserialize" && w.IsGenericMethod);
+        public override void Serialize(object value, Stream output) {
+            RuntimeTypeModel.Default.Serialize(output, value);
         }
 
-        public void Serialize<T>(T value, Stream output) {
-            ProtoBuf.Serializer.Serialize(output, value);
+        public override object Deserialize(Stream stream, Type type) {
+            return RuntimeTypeModel.Default.Deserialize(stream, null, type);
         }
 
-        public T Deserialize<T>(Stream stream) {
-            return ProtoBuf.Serializer.Deserialize<T>(stream);
+        protected override void SerializeCore(object value, TextWriter writer) {
+            throw new NotImplementedException();
         }
 
-        public object Deserialize(Stream stream, Type type) {
-            var genericType = _method.MakeGenericMethod(type);
-
-            return genericType.Invoke(this, new[] { stream });
+        protected override object DeserializeCore(TextReader reader, Type type) {
+            throw new NotImplementedException();
         }
     }
 }

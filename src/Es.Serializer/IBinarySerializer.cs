@@ -29,18 +29,9 @@ namespace Es.Serializer
         /// <summary>
         /// Serializes the specified value.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
         /// <param name="value">The value.</param>
         /// <param name="output">The output.</param>
-        void Serialize<T>(T value, Stream output);
-
-        /// <summary>
-        /// Deserializes the specified stream.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="stream">The stream.</param>
-        /// <returns>T.</returns>
-        T Deserialize<T>(Stream stream);
+        void Serialize(object value, Stream output);
 
         /// <summary>
         /// Deserializes the specified stream.

@@ -26,7 +26,7 @@ namespace Es.Serializer
     /// <summary>
     /// Class BinarySerializer.
     /// </summary>
-    public class BinarySerializer : IBinarySerializer
+    public class BinarySerializer : ObjectSerializerBase
     {
         /// <summary>
         /// The binary formatter
@@ -36,21 +36,10 @@ namespace Es.Serializer
         /// <summary>
         /// Serializes the specified value.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
         /// <param name="value">The value.</param>
         /// <param name="output">The output.</param>
-        public void Serialize<T>(T value, Stream output) {
+        public override void Serialize(object value, Stream output) {
             binaryFormatter.Serialize(output, value);
-        }
-
-        /// <summary>
-        /// Deserializes the specified stream.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="stream">The stream.</param>
-        /// <returns>T.</returns>
-        public T Deserialize<T>(Stream stream) {
-            return (T)Deserialize(stream, typeof(T));
         }
 
         /// <summary>
@@ -59,8 +48,16 @@ namespace Es.Serializer
         /// <param name="stream">The stream.</param>
         /// <param name="type">The type.</param>
         /// <returns>System.Object.</returns>
-        public object Deserialize(Stream stream, Type type) {
+        public override object Deserialize(Stream stream, Type type) {
             return binaryFormatter.Deserialize(stream);
+        }
+
+        protected override void SerializeCore(object value, TextWriter writer) {
+            throw new NotImplementedException();
+        }
+
+        protected override object DeserializeCore(TextReader reader, Type type) {
+            throw new NotImplementedException();
         }
     }
 }

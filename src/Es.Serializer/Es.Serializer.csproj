@@ -51,6 +51,7 @@
     <Compile Include="IObjectSerializer.cs" />
     <Compile Include="IStringSerializer.cs" />
     <Compile Include="ObjectSerializerBase.cs" />
+    <Compile Include="SerializerFactory.cs" />
     <Compile Include="SoapSerializer.cs" />
     <Compile Include="XmlSerializer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

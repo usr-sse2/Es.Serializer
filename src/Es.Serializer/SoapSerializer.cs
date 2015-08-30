@@ -5,20 +5,24 @@ using System.Runtime.Serialization.Formatters.Soap;
 
 namespace Es.Serializer
 {
-    public class SoapSerializer : IBinarySerializer
+    public class SoapSerializer : ObjectSerializerBase
     {
         private readonly IFormatter binaryFormatter = new SoapFormatter();
 
-        public void Serialize<T>(T value, Stream output) {
+        public override void Serialize(object value, Stream output) {
             binaryFormatter.Serialize(output, value);
         }
 
-        public T Deserialize<T>(Stream stream) {
-            return (T)Deserialize(stream, typeof(T));
+        public override object Deserialize(Stream stream, Type type) {
+            return binaryFormatter.Deserialize(stream);
         }
 
-        public object Deserialize(Stream stream, Type type) {
-            return binaryFormatter.Deserialize(stream);
+        protected override void SerializeCore(object value, TextWriter writer) {
+            throw new NotImplementedException();
+        }
+
+        protected override object DeserializeCore(TextReader reader, Type type) {
+            throw new NotImplementedException();
         }
     }
 }
