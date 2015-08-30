@@ -4,25 +4,24 @@ using NUnit.Framework;
 
 namespace SerializerTest
 {
-    public class ObjectSerializerTest
+    public class SoapSerializerTest
     {
-
         [Test]
-        public void Can_Xml_Serializer_String() {
-            var bs = new XmlSerializer();
+        public void Can_Soap_Serializer_String() {
+            var bs = new SoapSerializer();
 
             var foo1 = TestHelper.GetFoo();
 
             var str = bs.SerializeToString(foo1);
 
-            var foo2 = bs.DeserializeFromString(str, (typeof(Foo)));
+            var foo2 = bs.DeserializeFromString<Foo>(str);
 
             Assert.AreEqual(foo1.ToString(), foo2.ToString());
         }
 
         [Test]
-        public void Can_Xml_Serializer_Stream() {
-            var bs = new XmlSerializer();
+        public void Can_Soap_Serializer_Stream() {
+            var bs = new SoapSerializer();
 
             var foo1 = TestHelper.GetFoo();
             Stream output = new MemoryStream();
@@ -37,8 +36,8 @@ namespace SerializerTest
         }
 
         [Test]
-        public void Can_Xml_Serializer_Bytes() {
-            var bs = new XmlSerializer();
+        public void Can_Soap_Serializer_Bytes() {
+            var bs = new SoapSerializer();
 
             var foo1 = TestHelper.GetFoo();
             byte[] output;
@@ -49,8 +48,8 @@ namespace SerializerTest
         }
 
         [Test]
-        public void Can_Xml_Serializer_Writer_And_Reader() {
-            var bs = new XmlSerializer();
+        public void Can_Soap_Serializer_Writer_And_Reader() {
+            var bs = new SoapSerializer();
             var foo1 = TestHelper.GetFoo();
 
             StringWriter sw = new StringWriter();

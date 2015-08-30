@@ -31,8 +31,14 @@ namespace Es.Serializer
         /// </summary>
         /// <param name="value">The value.</param>
         /// <param name="output">The output.</param>
-        void Serialize(object value, out byte[] output);
+        void Serialize(object value, Stream output);
 
+        /// <summary>
+        /// Serializes the specified value.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <param name="output">The output.</param>
+        void Serialize(object value, out byte[] output);
 
         /// <summary>
         /// Serializes the specified value.
@@ -40,6 +46,14 @@ namespace Es.Serializer
         /// <param name="value">The value.</param>
         /// <param name="writer">The writer.</param>
         void Serialize(object value, TextWriter writer);
+
+        /// <summary>
+        /// Deserializes the specified stream.
+        /// </summary>
+        /// <param name="stream">The stream.</param>
+        /// <param name="type">The type.</param>
+        /// <returns>System.Object.</returns>
+        object Deserialize(Stream stream, Type type);
 
         /// <summary>
         /// Deserializes the specified type.

@@ -12,5 +12,10 @@ namespace Es.Serializer
         public static T Deserialize<T>(this ObjectSerializerBase self, Stream stream) {
             return (T)self.Deserialize(stream, typeof(T));
         }
+
+        public static To DeserializeFromString<To>(this ObjectSerializerBase self, string serializedText) {
+            return (To)self.DeserializeFromString(serializedText, typeof(To));
+        }
+
     }
 }

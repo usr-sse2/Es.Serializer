@@ -25,14 +25,6 @@ namespace Es.Serializer
     /// </summary>
     public interface IStringSerializer
     {
-        ///// <summary>
-        ///// Deserializes from string.
-        ///// </summary>
-        ///// <typeparam name="To">The type of to.</typeparam>
-        ///// <param name="serializedText">The serialized text.</param>
-        ///// <returns>To.</returns>
-        //To DeserializeFromString<To>(string serializedText);
-
         /// <summary>
         /// Deserializes from string.
         /// </summary>

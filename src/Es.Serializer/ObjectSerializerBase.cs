@@ -25,7 +25,7 @@ namespace Es.Serializer
     /// <summary>
     /// Class ObjectSerializerBase.
     /// </summary>
-    public abstract class ObjectSerializerBase : IObjectSerializer, IBinarySerializer, IStringSerializer
+    public abstract class ObjectSerializerBase : IObjectSerializer, IStringSerializer
     {
         /// <summary>
         /// The buffer size
@@ -35,7 +35,7 @@ namespace Es.Serializer
         /// <summary>
         /// The encoding
         /// </summary>
-        private readonly Encoding _encoding = Encoding.UTF8;
+        protected readonly Encoding Encoding = Encoding.UTF8;
 
         /// <summary>
         /// Serializes the core.
@@ -69,7 +69,7 @@ namespace Es.Serializer
         /// <param name="type">The type.</param>
         /// <returns>System.Object.</returns>
         public virtual object Deserialize(Stream stream, Type type) {
-            using (StreamReader reader = new StreamReader(stream, _encoding, true, bufferSize, true))
+            using (StreamReader reader = new StreamReader(stream, Encoding, true, bufferSize, true))
                 return Deserialize(reader, type);
         }
 
@@ -100,7 +100,7 @@ namespace Es.Serializer
         /// <param name="value">The value.</param>
         /// <param name="output">The output.</param>
         public virtual void Serialize(object value, Stream output) {
-            using (StreamWriter sw = new StreamWriter(output, _encoding, bufferSize, true))
+            using (StreamWriter sw = new StreamWriter(output, Encoding, bufferSize, true))
                 Serialize(value, sw);
         }
 

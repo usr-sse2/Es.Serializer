@@ -47,7 +47,6 @@
   <ItemGroup>
     <Compile Include="BinarySerializer.cs" />
     <Compile Include="DataContractSerializer.cs" />
-    <Compile Include="IBinarySerializer.cs" />
     <Compile Include="IObjectSerializer.cs" />
     <Compile Include="IStringSerializer.cs" />
     <Compile Include="ObjectSerializerBase.cs" />
