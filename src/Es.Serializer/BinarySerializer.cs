@@ -97,14 +97,5 @@ namespace Es.Serializer
             return DeserializeFromString(hex, type);
         }
 
-        public static byte[] FromHex(string hex) {
-            if (string.IsNullOrEmpty(hex)) return new byte[0];
-            if ((hex.Length % 2) != 0)
-                hex += " ";
-            byte[] returnBytes = new byte[hex.Length / 2];
-            for (int i = 0; i < returnBytes.Length; i++)
-                returnBytes[i] = Convert.ToByte(hex.Substring(i * 2, 2), 16);
-            return returnBytes;
-        }
     }
 }

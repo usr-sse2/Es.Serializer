@@ -52,10 +52,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ProtoBufSerializerTest.cs" />
     <Compile Include="SoapSerializerTest.cs" />
     <Compile Include="BinarySerializerTest.cs" />
     <Compile Include="JilSerializerTest.cs" />
     <Compile Include="JsonNetSerializerTest.cs" />
+    <Compile Include="DataContractSerializerTest.cs" />
     <Compile Include="XmlSerializerTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Foo.cs" />

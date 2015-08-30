@@ -14,12 +14,50 @@ namespace Es.Serializer
             return RuntimeTypeModel.Default.Deserialize(stream, null, type);
         }
 
-        protected override void SerializeCore(object value, TextWriter writer) {
-            throw new NotImplementedException();
+        /// <summary>
+        /// Serializes to string.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>System.String.</returns>
+        public override string SerializeToString(object value) {
+            using (MemoryStream mem = new MemoryStream()) {
+                Serialize(value, mem);
+                return BitConverter.ToString(mem.ToArray()).Replace("-", string.Empty);
+            }
         }
 
-        protected override object DeserializeCore(TextReader reader, Type type) {
-            throw new NotImplementedException();
+        /// <summary>
+        /// Deserializes from string.
+        /// </summary>
+        /// <param name="serializedText">The serialized text.</param>
+        /// <param name="type">The type.</param>
+        /// <returns>System.Object.</returns>
+        public override object DeserializeFromString(string serializedText, Type type) {
+            var data = FromHex(serializedText);
+            using (MemoryStream mem = new MemoryStream(data)) {
+                return Deserialize(mem, type);
+            }
         }
+
+        /// <summary>
+        /// Serializes the core.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <param name="writer">The writer.</param>
+        protected override void SerializeCore(object value, TextWriter writer) {
+            writer.Write(SerializeToString(value));
+        }
+
+        /// <summary>
+        /// Deserializes the core.
+        /// </summary>
+        /// <param name="reader">The reader.</param>
+        /// <param name="type">The type.</param>
+        /// <returns>System.Object.</returns>
+        protected override object DeserializeCore(TextReader reader, Type type) {
+            var hex = reader.ReadToEnd();
+            return DeserializeFromString(hex, type);
+        }
+
     }
 }

@@ -117,13 +117,15 @@ namespace Es.Serializer
         }
 
         /// <summary>
-        /// Deserializes from string.
+        /// Serializes to string.
         /// </summary>
-        /// <typeparam name="To">The type of to.</typeparam>
-        /// <param name="serializedText">The serialized text.</param>
-        /// <returns>To.</returns>
-        public To DeserializeFromString<To>(string serializedText) {
-            return (To)DeserializeFromString(serializedText, typeof(To));
+        /// <param name="value">The value.</param>
+        /// <returns>System.String.</returns>
+        public virtual string SerializeToString(object value) {
+            using (StringWriter writer = new StringWriter()) {
+                SerializeCore(value, writer);
+                return writer.ToString();
+            }
         }
 
         /// <summary>
@@ -138,16 +140,18 @@ namespace Es.Serializer
             }
         }
 
-        /// <summary>
-        /// Serializes to string.
-        /// </summary>
-        /// <param name="value">The value.</param>
-        /// <returns>System.String.</returns>
-        public virtual string SerializeToString(object value) {
-            using (StringWriter writer = new StringWriter()) {
-                SerializeCore(value, writer);
-                return writer.ToString();
-            }
+        protected static string ToHex(byte[] data) {
+            return BitConverter.ToString(data).Replace("-", string.Empty);
+        }
+
+        protected static byte[] FromHex(string hex) {
+            if (string.IsNullOrEmpty(hex)) return new byte[0];
+            if ((hex.Length % 2) != 0)
+                hex += " ";
+            byte[] returnBytes = new byte[hex.Length / 2];
+            for (int i = 0; i < returnBytes.Length; i++)
+                returnBytes[i] = Convert.ToByte(hex.Substring(i * 2, 2), 16);
+            return returnBytes;
         }
     }
 }
