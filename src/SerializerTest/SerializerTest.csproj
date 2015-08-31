@@ -62,6 +62,7 @@
   <ItemGroup>
     <Compile Include="ExtendTest.cs" />
     <Compile Include="ProtoBufSerializerTest.cs" />
+    <Compile Include="SerializerFactoryTest.cs" />
     <Compile Include="SoapSerializerTest.cs" />
     <Compile Include="BinarySerializerTest.cs" />
     <Compile Include="JilSerializerTest.cs" />

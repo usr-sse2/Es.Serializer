@@ -60,7 +60,7 @@ namespace Es.Serializer
         public override string SerializeToString(object value) {
             using (MemoryStream mem = new MemoryStream()) {
                 Serialize(value, mem);
-                return BitConverter.ToString(mem.ToArray()).Replace("-", string.Empty);
+                return ToHex(mem.ToArray());
             }
         }
 

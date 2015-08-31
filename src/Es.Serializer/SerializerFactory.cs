@@ -15,6 +15,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
 
 /// <summary>
 /// The Serializer namespace.
@@ -27,15 +28,15 @@ namespace Es.Serializer
     public sealed class SerializerFactory
     {
         private static Dictionary<string, ObjectSerializerBase> _objectSerializerCache;
-        
+
         private static XmlSerializer _xml;
-        
+
         private static SoapSerializer _soap;
-        
+
         private static BinarySerializer _binary;
-        
+
         private static DataContractSerializer _dataContract;
-        
+
         private static ObjectSerializerBase _default;
 
         /// <summary>
@@ -89,9 +90,9 @@ namespace Es.Serializer
         /// <summary>
         /// Gets the default.
         /// </summary>
-        /// <returns>ObjectSerializerBase.</returns>
-        public static ObjectSerializerBase GetDefault() {
-            return _default;
+        /// <value>The default.</value>
+        public static ObjectSerializerBase Default {
+            get { return _default; }
         }
 
         /// <summary>
@@ -100,7 +101,14 @@ namespace Es.Serializer
         /// <param name="def">The definition.</param>
         /// <returns>ObjectSerializerBase.</returns>
         public static ObjectSerializerBase SetDefault(ObjectSerializerBase def) {
-            return _default = def;
+            ObjectSerializerBase oldValue, currentValue;
+            currentValue = _default;
+            do {
+                oldValue = currentValue;
+                currentValue = Interlocked.CompareExchange(ref _default, def, oldValue);
+            }
+            while (currentValue != oldValue);
+            return _default;
         }
 
         /// <summary>

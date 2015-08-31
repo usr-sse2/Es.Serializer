@@ -21,7 +21,7 @@ namespace Es.Serializer
             using (MemoryStream ms = new MemoryStream()) {
                 self.Serialize(obj, ms);
                 ms.Seek(0, SeekOrigin.Begin);
-                return (T)self.Deserialize(ms, obj.GetType());
+                return self.Deserialize<T>(ms);
             }
         }
 
