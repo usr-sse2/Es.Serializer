@@ -13,6 +13,7 @@
  * ---------------------------------------------------------------------------
  * */
 
+using Es.Serializer;
 /// <summary>
 /// The PerformanceTest namespace.
 /// </summary>
@@ -28,6 +29,9 @@ namespace PerformanceTest
         /// </summary>
         /// <param name="args">The arguments.</param>
         private static void Main(string[] args) {
+            SerializerFactory.AddSerializer<JilSerializer>("jil");
+            SerializerFactory.AddSerializer<JsonNetSerializer>("jsonNet");
+            SerializerFactory.AddSerializer<ProtoBufSerializer>("ProtoBuf");
             TestExcute.Excute(typeof(Program));
         }
     }

@@ -6,6 +6,7 @@ namespace SerializerTest
 {
     public class BinarySerializerTest
     {
+
         [Test]
         public void Can_Binary_Serializer_String() {
             var bs = SerializerFactory.Get("binary");

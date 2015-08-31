@@ -29,6 +29,7 @@ namespace PerformanceTest
         SoapSerializer soapserializer = new SoapSerializer();
         DataContractSerializer datacontractserializer = new DataContractSerializer();
 
+
         [Test("Serializers Performance Test")]
         public void SerializersTest() {
 
@@ -36,16 +37,23 @@ namespace PerformanceTest
 
             const int runs = 10000;
 
-            Console.WriteLine("Jil\t\tJsonNet\t\tProtobuf\tXml\t\tBinary\t\tSoap\t\tDataContract");
+            Console.WriteLine("\tJil\t\tJsonNet\t\tProtobuf\tXml\t\tBinary\t\tSoap\t\tDataContract");
 
             var foo = Helper.GetFoo();
 
             double[] speeds = CompareSerializers(foo, runs);
 
-            Console.WriteLine(string.Join("\t\t", Enumerable.Range(0, serializer.Count).Select(s => "{" + s + "}")),
+            Console.WriteLine("single\t" + string.Join("\t\t", Enumerable.Range(0, serializer.Count).Select(s => "{" + s + "}")),
                 speeds.Select(s => s.ToString()).ToArray());
 
+            var wrapper = new SerializerWrapper(foo);
+
+            speeds = CompareSerializers(wrapper, runs);
+
+            Console.WriteLine("wrapper\t" + string.Join("\t\t", Enumerable.Range(0, serializer.Count).Select(s => "{" + s + "}")),
+                speeds.Select(s => s.ToString()).ToArray());
         }
+
 
         [Test("Deserialize Performance Test")]
         public void CompareDeserializes() {
@@ -54,13 +62,20 @@ namespace PerformanceTest
 
             const int runs = 10000;
 
-            Console.WriteLine("Jil\t\tJsonNet\t\tProtobuf\tXml\t\tBinary\t\tSoap\t\tDataContract");
+            Console.WriteLine("\tJil\t\tJsonNet\t\tProtobuf\tXml\t\tBinary\t\tSoap\t\tDataContract");
 
             var foo = Helper.GetFoo();
-            
+
             double[] speeds = CompareDeserializes(foo, runs);
 
-            Console.WriteLine(string.Join("\t\t", Enumerable.Range(0, serializer.Count).Select(s => "{" + s + "}")),
+            Console.WriteLine("single\t" + string.Join("\t\t", Enumerable.Range(0, serializer.Count).Select(s => "{" + s + "}")),
+                speeds.Select(s => s.ToString()).ToArray());
+
+            var wrapper = new SerializerWrapper(foo);
+
+            speeds = CompareDeserializes(wrapper, runs);
+
+            Console.WriteLine("wrapper\t" + string.Join("\t\t", Enumerable.Range(0, serializer.Count).Select(s => "{" + s + "}")),
                 speeds.Select(s => s.ToString()).ToArray());
 
         }
