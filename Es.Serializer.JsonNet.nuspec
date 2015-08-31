@@ -13,7 +13,7 @@
     <tags>Serializer</tags>
     <language>en-US</language>
     <dependencies>
-      <dependency id="Es.Serializer" version="0.0.1" />
+      <dependency id="Es.Serializer" version="0.0.2" />
       <dependency id="Newtonsoft.Json" version="[7.0.1,]" />
     </dependencies>
   </metadata>
