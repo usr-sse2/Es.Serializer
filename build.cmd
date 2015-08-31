@@ -36,6 +36,9 @@ goto menu
 
 :2
 powershell -NoProfile -ExecutionPolicy Bypass -Command "& '%~dp0tools\psake\psake.ps1' build-nuget.ps1 %*; if ($psake.build_success -eq $false) { exit 1 } else { exit 0 }"
+
+call nuget-push.cmd
+
 echo.
 echo Build ok!
 echo.
