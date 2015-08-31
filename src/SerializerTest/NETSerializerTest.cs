@@ -1,14 +1,12 @@
 ﻿using System.IO;
-using Es.Serializer;
 using System.Linq;
+using Es.Serializer;
 using NUnit.Framework;
-using System;
 
 namespace SerializerTest
 {
     public class NETSerializerTest
     {
-
         [TestFixtureSetUp]
         public void Init() {
             var type = typeof(INetMessage);

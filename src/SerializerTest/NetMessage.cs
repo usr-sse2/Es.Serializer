@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace SerializerTest
+﻿namespace SerializerTest
 {
     public interface INetMessage
     {
