@@ -6,9 +6,14 @@ namespace SerializerTest
 {
     public class JsonNetSerializerTest
     {
+        [TestFixtureSetUp]
+        public void Init() {
+            SerializerFactory.AddSerializer<JsonNetSerializer>("jsonNet");
+        }
+
         [Test]
         public void Can_JsonNet_Serializer_String() {
-            var bs = new JsonNetSerializer();
+            var bs = SerializerFactory.Get("jsonNet");
 
             var foo1 = TestHelper.GetFoo();
 
@@ -21,7 +26,7 @@ namespace SerializerTest
 
         [Test]
         public void Can_JsonNet_Serializer_Stream() {
-            var bs = new JsonNetSerializer();
+            var bs = SerializerFactory.Get("jsonNet");
 
             var foo1 = TestHelper.GetFoo();
             Stream output = new MemoryStream();
@@ -37,7 +42,7 @@ namespace SerializerTest
 
         [Test]
         public void Can_JsonNet_Serializer_Bytes() {
-            var bs = new JsonNetSerializer();
+            var bs = SerializerFactory.Get("jsonNet");
 
             var foo1 = TestHelper.GetFoo();
             byte[] output;
@@ -49,7 +54,7 @@ namespace SerializerTest
 
         [Test]
         public void Can_JsonNet_Serializer_Writer_And_Reader() {
-            var bs = new JsonNetSerializer();
+            var bs = SerializerFactory.Get("jsonNet");
             var foo1 = TestHelper.GetFoo();
 
             StringWriter sw = new StringWriter();
