@@ -18,7 +18,8 @@ namespace PerformanceTest
             {"Xml",()=> { }},
             {"Binary",()=> { }},
             {"Soap",()=> { }},
-            {"DataContract",()=> { }}
+            {"DataContract",()=> { }},
+            {"NET",()=> { }}
         };
 
         JilSerializer jilserializer = new JilSerializer();
@@ -37,7 +38,7 @@ namespace PerformanceTest
 
             const int runs = 10000;
 
-            Console.WriteLine("\tJil\t\tJsonNet\t\tProtobuf\tXml\t\tBinary\t\tSoap\t\tDataContract");
+            Console.WriteLine("\tJil\t\tJsonNet\t\tProtobuf\tXml\t\tBinary\t\tSoap\t\tDataContract\tNET");
 
             var foo = Helper.GetFoo();
 
@@ -62,7 +63,7 @@ namespace PerformanceTest
 
             const int runs = 10000;
 
-            Console.WriteLine("\tJil\t\tJsonNet\t\tProtobuf\tXml\t\tBinary\t\tSoap\t\tDataContract");
+            Console.WriteLine("\tJil\t\tJsonNet\t\tProtobuf\tXml\t\tBinary\t\tSoap\t\tDataContract\tNET");
 
             var foo = Helper.GetFoo();
 
@@ -99,6 +100,10 @@ namespace PerformanceTest
             }
             using (MemoryStream mem = new MemoryStream()) {
                 soapserializer.Serialize(obj, mem);
+            }
+            var netserializer = SerializerFactory.Get("NET");
+            using (MemoryStream mem = new MemoryStream()) {
+                netserializer.Serialize(obj, mem);
             }
 
             var keys = serializer.Keys.ToList();
@@ -174,6 +179,17 @@ namespace PerformanceTest
                 }, runs);
             };
 
+            serializer["NET"] = () =>
+            {
+                GC.Collect(2, GCCollectionMode.Forced, blocking: true);
+                ret[keys.IndexOf("NET")] = Helper.AverageRuntime(() =>
+                {
+                    using (MemoryStream mem = new MemoryStream()) {
+                        netserializer.Serialize(obj, mem);
+                    }
+                }, runs);
+            };
+
             keys.ForEach(k =>
             {
                 serializer[k]();
@@ -191,7 +207,7 @@ namespace PerformanceTest
             var jilSerializedText = jilserializer.SerializeToString(obj);
             var jsonnetSerializedText = jsonnetserializer.SerializeToString(obj);
             var xmlSerializedText = xmlserializer.SerializeToString(obj);
-            byte[] protobufData, binaryData, dataContractData, soapData;
+            byte[] protobufData, binaryData, dataContractData, soapData, netData;
             using (MemoryStream mem = new MemoryStream()) {
                 protobufserializer.Serialize(obj, mem);
                 protobufData = mem.ToArray();
@@ -207,6 +223,11 @@ namespace PerformanceTest
             using (MemoryStream mem = new MemoryStream()) {
                 soapserializer.Serialize(obj, mem);
                 soapData = mem.ToArray();
+            }
+            var netserializer = SerializerFactory.Get("NET");
+            using (MemoryStream mem = new MemoryStream()) {
+                netserializer.Serialize(obj, mem);
+                netData = mem.ToArray();
             }
 
             var keys = serializer.Keys.ToList();
@@ -278,6 +299,18 @@ namespace PerformanceTest
                 {
                     using (MemoryStream mem = new MemoryStream(dataContractData)) {
                         datacontractserializer.Deserialize(mem, objType);
+                    }
+                }, runs);
+            };
+
+
+            serializer["NET"] = () =>
+            {
+                GC.Collect(2, GCCollectionMode.Forced, blocking: true);
+                ret[keys.IndexOf("NET")] = Helper.AverageRuntime(() =>
+                {
+                    using (MemoryStream mem = new MemoryStream(netData)) {
+                        netserializer.Deserialize(mem, objType);
                     }
                 }, runs);
             };

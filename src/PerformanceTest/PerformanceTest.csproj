@@ -85,6 +85,10 @@
       <Project>{fe958d7a-c47d-4656-a850-29f9818d5138}</Project>
       <Name>Es.Serializer.JsonNet</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Es.Serializer.NetSerializer\Es.Serializer.NetSerializer.csproj">
+      <Project>{8579f6cb-4e23-4da0-8986-e8d305f364fd}</Project>
+      <Name>Es.Serializer.NetSerializer</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Es.Serializer.ProtoBuf\Es.Serializer.ProtoBuf.csproj">
       <Project>{0f4b7af3-c13c-4cfe-b853-cac0e5158b89}</Project>
       <Name>Es.Serializer.ProtoBuf</Name>

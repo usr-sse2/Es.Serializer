@@ -32,6 +32,11 @@ namespace PerformanceTest
             SerializerFactory.AddSerializer<JilSerializer>("jil");
             SerializerFactory.AddSerializer<JsonNetSerializer>("jsonNet");
             SerializerFactory.AddSerializer<ProtoBufSerializer>("ProtoBuf");
+
+            NetSerializer.Serializer instance = new NetSerializer.Serializer(new[] { typeof(Foo), typeof(SerializerWrapper) });
+            NETSerializer ns = new NETSerializer(instance);
+            SerializerFactory.AddSerializer(new NETSerializer(instance), "NET");
+
             TestExcute.Excute(typeof(Program));
         }
     }
