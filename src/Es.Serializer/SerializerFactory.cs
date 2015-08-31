@@ -17,9 +17,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 
-/// <summary>
-/// The Serializer namespace.
-/// </summary>
 namespace Es.Serializer
 {
     /// <summary>

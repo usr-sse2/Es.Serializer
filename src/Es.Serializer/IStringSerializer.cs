@@ -15,9 +15,6 @@
 
 using System;
 
-/// <summary>
-/// The Serializer namespace.
-/// </summary>
 namespace Es.Serializer
 {
     /// <summary>

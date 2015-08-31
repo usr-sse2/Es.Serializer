@@ -18,9 +18,6 @@ using System.IO;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 
-/// <summary>
-/// The Serializer namespace.
-/// </summary>
 namespace Es.Serializer
 {
     /// <summary>

@@ -17,9 +17,6 @@ using System;
 using System.IO;
 using System.Text;
 
-/// <summary>
-/// The Serializer namespace.
-/// </summary>
 namespace Es.Serializer
 {
     /// <summary>
@@ -140,12 +137,22 @@ namespace Es.Serializer
             }
         }
 
- 
+
+        /// <summary>
+        /// To the hexadecimal.
+        /// </summary>
+        /// <param name="data">The data.</param>
+        /// <returns>System.String.</returns>
         protected static string ToHex(byte[] data) {
             return BitConverter.ToString(data).Replace("-", string.Empty);
         }
 
 
+        /// <summary>
+        /// Froms the hexadecimal.
+        /// </summary>
+        /// <param name="hex">The hexadecimal.</param>
+        /// <returns>System.Byte[].</returns>
         protected static byte[] FromHex(string hex) {
             if (string.IsNullOrEmpty(hex)) return new byte[0];
             if ((hex.Length % 2) != 0)
