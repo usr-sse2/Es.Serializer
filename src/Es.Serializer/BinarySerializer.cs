@@ -96,6 +96,5 @@ namespace Es.Serializer
             var hex = reader.ReadToEnd();
             return DeserializeFromString(hex, type);
         }
-
     }
 }

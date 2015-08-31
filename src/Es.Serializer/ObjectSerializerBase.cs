@@ -140,9 +140,11 @@ namespace Es.Serializer
             }
         }
 
+ 
         protected static string ToHex(byte[] data) {
             return BitConverter.ToString(data).Replace("-", string.Empty);
         }
+
 
         protected static byte[] FromHex(string hex) {
             if (string.IsNullOrEmpty(hex)) return new byte[0];

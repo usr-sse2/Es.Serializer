@@ -8,7 +8,7 @@ namespace SerializerTest
     {
         [Test]
         public void Can_Soap_Serializer_String() {
-            var bs = new SoapSerializer();
+            var bs = SerializerFactory.Get("soap");
 
             var foo1 = TestHelper.GetFoo();
 
@@ -21,7 +21,7 @@ namespace SerializerTest
 
         [Test]
         public void Can_Soap_Serializer_Stream() {
-            var bs = new SoapSerializer();
+            var bs = SerializerFactory.Get("soap");
 
             var foo1 = TestHelper.GetFoo();
             Stream output = new MemoryStream();
@@ -37,7 +37,7 @@ namespace SerializerTest
 
         [Test]
         public void Can_Soap_Serializer_Bytes() {
-            var bs = new SoapSerializer();
+            var bs = SerializerFactory.Get("soap");
 
             var foo1 = TestHelper.GetFoo();
             byte[] output;
@@ -49,7 +49,7 @@ namespace SerializerTest
 
         [Test]
         public void Can_Soap_Serializer_Writer_And_Reader() {
-            var bs = new SoapSerializer();
+            var bs = SerializerFactory.Get("soap");
             var foo1 = TestHelper.GetFoo();
 
             StringWriter sw = new StringWriter();

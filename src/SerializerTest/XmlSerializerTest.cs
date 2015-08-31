@@ -9,7 +9,7 @@ namespace SerializerTest
 
         [Test]
         public void Can_Xml_Serializer_String() {
-            var bs = new XmlSerializer();
+            var bs = SerializerFactory.Get("xml");
 
             var foo1 = TestHelper.GetFoo();
 
@@ -22,7 +22,7 @@ namespace SerializerTest
 
         [Test]
         public void Can_Xml_Serializer_Stream() {
-            var bs = new XmlSerializer();
+            var bs = SerializerFactory.Get("xml");
 
             var foo1 = TestHelper.GetFoo();
             Stream output = new MemoryStream();
@@ -38,7 +38,7 @@ namespace SerializerTest
 
         [Test]
         public void Can_Xml_Serializer_Bytes() {
-            var bs = new XmlSerializer();
+            var bs = SerializerFactory.Get("xml");
 
             var foo1 = TestHelper.GetFoo();
             byte[] output;
@@ -50,7 +50,7 @@ namespace SerializerTest
 
         [Test]
         public void Can_Xml_Serializer_Writer_And_Reader() {
-            var bs = new XmlSerializer();
+            var bs = SerializerFactory.Get("xml");
             var foo1 = TestHelper.GetFoo();
 
             StringWriter sw = new StringWriter();
