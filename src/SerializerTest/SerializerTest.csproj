@@ -60,6 +60,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CompressionTest.cs" />
     <Compile Include="ExtendTest.cs" />
     <Compile Include="ProtoBufSerializerTest.cs" />
     <Compile Include="SerializerFactoryTest.cs" />

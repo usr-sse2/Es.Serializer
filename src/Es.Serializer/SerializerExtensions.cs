@@ -13,6 +13,14 @@ namespace Es.Serializer
             return (T)self.Deserialize(stream, typeof(T));
         }
 
+        public static To Deserialize<To>(this IObjectSerializer self, byte[] data) {
+            return (To)self.Deserialize(data, typeof(To));
+        }
+
+        public static To Deserialize<To>(this IObjectSerializer self, TextReader reader) {
+            return (To)self.Deserialize(reader, typeof(To));
+        }
+
         public static To DeserializeFromString<To>(this ObjectSerializerBase self, string serializedText) {
             return (To)self.DeserializeFromString(serializedText, typeof(To));
         }

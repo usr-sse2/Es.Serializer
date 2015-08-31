@@ -29,7 +29,7 @@ namespace SerializerTest
             bs.Serialize(foo1, output);
 
             output.Position = 0;
-            var foo2 = bs.Deserialize(output, typeof(Foo));
+            var foo2 = bs.Deserialize<Foo>(output);
 
             output.Dispose();
 
@@ -44,7 +44,7 @@ namespace SerializerTest
             byte[] output;
             bs.Serialize(foo1, out output);
 
-            var foo2 = bs.Deserialize(output, typeof(Foo));
+            var foo2 = bs.Deserialize<Foo>(output);
             Assert.AreEqual(foo1.ToString(), foo2.ToString());
         }
 
@@ -59,7 +59,7 @@ namespace SerializerTest
 
             StringReader sr = new StringReader(sw.ToString());
 
-            var foo2 = bs.Deserialize(sr, typeof(Foo));
+            var foo2 = bs.Deserialize<Foo>(sr);
 
             Assert.AreEqual(foo1.ToString(), foo2.ToString());
         }
