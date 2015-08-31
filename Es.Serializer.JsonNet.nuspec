@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package>
+  <metadata>
+    <id>Es.Serializer.JsonNet</id>
+    <version>0.0.0</version>
+    <title>easy work | Serializer.JsonNet</title>
+    <authors>v.la@Live.cn</authors>
+    <owners>v.la@Live.cn</owners>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <description>C# Serializer Factory</description>
+    <licenseUrl>http://www.apache.org/licenses/LICENSE-2.0</licenseUrl>
+    <projectUrl>https://github.com/vla/Es.Serializer</projectUrl>
+    <tags>Serializer</tags>
+    <language>en-US</language>
+    <dependencies>
+      <dependency id="Es.Serializer" version="0.0.1" />
+      <dependency id="Newtonsoft.Json" version="[6.0.1,]" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="artifacts\bin\Es.Serializer.JsonNet.dll" target="lib\net45" />
+  </files>
+</package>
