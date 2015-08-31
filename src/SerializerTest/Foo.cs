@@ -5,7 +5,7 @@ using ProtoBuf;
 namespace SerializerTest
 {
     [Serializable, DataContract, ProtoContract]
-    public class Foo
+    public class Foo : INetMessage
     {
         [DataMember, ProtoMember(1)]
         public int Id { get; set; }
@@ -33,7 +33,7 @@ namespace SerializerTest
     }
 
     [Serializable, DataContract, ProtoContract]
-    public class InnerFoo
+    public class InnerFoo 
     {
         [DataMember, ProtoMember(1)]
         public decimal InnerNumeric {
