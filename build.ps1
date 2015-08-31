@@ -11,8 +11,8 @@
   $prjo_files = @("$base_dir\Src\Es.Serializer\Es.Serializer.csproj",`
                 "$base_dir\Src\Es.Serializer.Jil\Es.Serializer.Jil.csproj",`
                 "$base_dir\Src\Es.Serializer.JsonNet\Es.Serializer.JsonNet.csproj",`
-                "$base_dir\Src\Es.Serializer.ProtoBuf\Es.Serializer.ProtoBuf.csproj")
-  $lib_file = "$base_dir\Src\Es.Serializer\Es.Serializer.csproj"
+                "$base_dir\Src\Es.Serializer.ProtoBuf\Es.Serializer.ProtoBuf.csproj",`
+                "$base_dir\Src\Es.Serializer.NetSerializer\Es.Serializer.NetSerializer.csproj")
   $nuspec_file = "$base_dir\fasthttprequest.nuspec"
 
   $nuget_tool = "$tools_dir\nuget\nuget.exe"

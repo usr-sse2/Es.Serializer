@@ -9,7 +9,8 @@
   $nuspec_files = @("$base_dir\Es.Serializer.nuspec",`
                 "$base_dir\Es.Serializer.Jil.nuspec",`
                 "$base_dir\Es.Serializer.JsonNet.nuspec",`
-                "$base_dir\Es.Serializer.ProtoBuf.nuspec")
+                "$base_dir\Es.Serializer.ProtoBuf.nuspec",`
+                "$base_dir\Es.Serializer.NetSerializer.nuspec")
   $nuget_tool = "$tools_dir\nuget\nuget.exe"
 
 }
