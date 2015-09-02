@@ -9,7 +9,7 @@
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
     <description>C# Serializer Factory</description>
     <licenseUrl>http://www.apache.org/licenses/LICENSE-2.0</licenseUrl>
-    <projectUrl>https://github.com/vla/Es.Serializer</projectUrl>
+    <projectUrl>https://github.com/EsWork/Es.Serializer</projectUrl>
     <tags>Serializer</tags>
     <language>en-US</language>
   </metadata>
