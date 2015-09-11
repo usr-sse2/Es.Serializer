@@ -28,12 +28,6 @@ function RemoveDirectory($path) {
 
 Framework('4.0')
 
-function BuildHasBeenRun {
-    $build_exists = (Test-Path $bin_dir)
-    Assert $build_exists "Build task has not been run."
-    $true
-}
-
 Task default -depends Compile
 
 Task Compile -depends Clean { 
@@ -65,6 +59,6 @@ Task Compile -depends Clean {
 }
 
 Task Clean { 
-    RemoveDirectory $artifacts_dir -Recurse -Force
+    RemoveDirectory $artifacts_dir
 }
 
