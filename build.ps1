@@ -65,6 +65,6 @@ Task Compile -depends Clean {
 }
 
 Task Clean { 
-    RemoveDirectory $artifacts_dir
+    RemoveDirectory $artifacts_dir -Recurse -Force
 }
 
