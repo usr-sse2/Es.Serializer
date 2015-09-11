@@ -15,6 +15,7 @@
                 "$base_dir\Src\Es.Serializer.NetSerializer\Es.Serializer.NetSerializer.csproj")
   $nuspec_file = "$base_dir\fasthttprequest.nuspec"
 
+  $sn_file = "$base_dir\src\Es.Serializer.sln"
   $nuget_tool = "$tools_dir\nuget\nuget.exe"
   $zip_tool = "$tools_dir\7Zip\7za.exe"
 }
@@ -36,6 +37,9 @@ function BuildHasBeenRun {
 Task default -depends Compile
 
 Task Compile -depends Clean { 
+
+ Exec { &$nuget_tool restore $sn_file}
+
   mkdir -path $bin_dir | out-null
   Foreach($file in $prjo_files){
      Write-Host "Building $file for .NET $tfver" -ForegroundColor Green
