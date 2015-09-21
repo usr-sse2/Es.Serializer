@@ -17,6 +17,8 @@ SerializerFactory.Default.Serialize(obj,sw);
 
 StringReader sr = new StringReader(sw.ToString());
 
+var foo = bs.Deserialize(sr, typeof(Foo));
+
 ```
 
 ### Serializing Stream
