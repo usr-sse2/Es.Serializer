@@ -33,7 +33,7 @@ var foo = bs.Deserialize(output, typeof(Foo));
 
 ```
 
-### Serializing Stream
+### Serializing String
 
 ```C#
 
