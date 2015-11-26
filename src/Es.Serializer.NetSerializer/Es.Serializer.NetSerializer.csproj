@@ -20,6 +20,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -28,12 +29,15 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>..\Es.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="NetSerializer, Version=4.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\NetSerializer.4.0.0.0\lib\net45\NetSerializer.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -45,6 +49,21 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="NETSerializer.cs" />
+    <Compile Include="NS\Helpers.cs" />
+    <Compile Include="NS\ITypeSerializer.cs" />
+    <Compile Include="NS\Primitives.cs" />
+    <Compile Include="NS\Serializer.cs" />
+    <Compile Include="NS\TypeData.cs" />
+    <Compile Include="NS\TypeDictionary.cs" />
+    <Compile Include="NS\TypeIDList.cs" />
+    <Compile Include="NS\TypeSerializers\ArraySerializer.cs" />
+    <Compile Include="NS\TypeSerializers\DictionarySerializer.cs" />
+    <Compile Include="NS\TypeSerializers\EnumSerializer.cs" />
+    <Compile Include="NS\TypeSerializers\GenericSerializer.cs" />
+    <Compile Include="NS\TypeSerializers\NoOpSerializer.cs" />
+    <Compile Include="NS\TypeSerializers\NullableSerializer.cs" />
+    <Compile Include="NS\TypeSerializers\ObjectSerializer.cs" />
+    <Compile Include="NS\TypeSerializers\PrimitivesSerializer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -52,9 +71,6 @@
       <Project>{0cde4ee6-18c7-45bd-89f5-e69a01ef62c9}</Project>
       <Name>Es.Serializer</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

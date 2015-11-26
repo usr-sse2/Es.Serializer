@@ -6,7 +6,7 @@ namespace SerializerTest
 {
     public class JilSerializerTest
     {
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Init() {
             SerializerFactory.AddSerializer<JilSerializer>("jil");
         }

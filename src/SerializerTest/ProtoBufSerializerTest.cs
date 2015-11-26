@@ -6,7 +6,7 @@ namespace SerializerTest
 {
     public class ProtoBufSerializerTest
     {
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Init() {
             SerializerFactory.AddSerializer<ProtoBufSerializer>("ProtoBuf");
         }

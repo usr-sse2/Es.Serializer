@@ -7,7 +7,7 @@ namespace SerializerTest
 {
     public class NETSerializerTest
     {
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Init() {
             var type = typeof(INetMessage);
             var types = type.Assembly.GetTypes()

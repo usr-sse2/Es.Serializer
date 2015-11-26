@@ -6,7 +6,7 @@ namespace SerializerTest
 {
     public class JsonNetSerializerTest
     {
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Init() {
             SerializerFactory.AddSerializer<JsonNetSerializer>("jsonNet");
         }

@@ -10,7 +10,7 @@ namespace SerializerTest
 {
     public class ExtendTest
     {
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Init() {
             SerializerFactory.AddSerializer<JilSerializer>("jil");
             SerializerFactory.AddSerializer<JsonNetSerializer>("jsonNet");

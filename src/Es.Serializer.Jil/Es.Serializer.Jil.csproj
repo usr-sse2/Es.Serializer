@@ -20,6 +20,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -28,14 +29,17 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>..\Es.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Jil, Version=2.12.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Jil.2.12.1\lib\net45\Jil.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Sigil, Version=4.5.0.0, Culture=neutral, PublicKeyToken=2d06c3494341c8ab, processorArchitecture=MSIL">
-      <HintPath>..\packages\Sigil.4.5.0\lib\net45\Sigil.dll</HintPath>
+    <Reference Include="Sigil, Version=4.5.1.0, Culture=neutral, PublicKeyToken=2d06c3494341c8ab, processorArchitecture=MSIL">
+      <HintPath>..\packages\Sigil.4.5.1\lib\net45\Sigil.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -50,6 +54,59 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="JilSerializer.cs" />
+    <Compile Include="Jil\Common\ConstructionException.cs" />
+    <Compile Include="Jil\Common\EnumValues.cs" />
+    <Compile Include="Jil\Common\ExtensionMethods.cs" />
+    <Compile Include="Jil\Common\FlagsEnumCombiner.cs" />
+    <Compile Include="Jil\Common\PeekSupportingTextReader.cs" />
+    <Compile Include="Jil\Common\Utils.cs" />
+    <Compile Include="Jil\DateTimeFormat.cs" />
+    <Compile Include="Jil\DeserializationException.cs" />
+    <Compile Include="Jil\DeserializeDynamic\DynamicDeserializer.cs" />
+    <Compile Include="Jil\DeserializeDynamic\DynamicDeserializer.ThunkReader.cs" />
+    <Compile Include="Jil\DeserializeDynamic\JsonObject.cs" />
+    <Compile Include="Jil\DeserializeDynamic\JsonObject.Dynamic.cs" />
+    <Compile Include="Jil\DeserializeDynamic\JsonObject.Enumerators.cs" />
+    <Compile Include="Jil\DeserializeDynamic\JsonObject.FastNumber.cs" />
+    <Compile Include="Jil\DeserializeDynamic\JsonObject.Static.cs" />
+    <Compile Include="Jil\DeserializeDynamic\JsonObject.TypeConverter.cs" />
+    <Compile Include="Jil\DeserializeDynamic\Methods.cs" />
+    <Compile Include="Jil\DeserializeDynamic\Methods.ISO8601DateTime.cs" />
+    <Compile Include="Jil\DeserializeDynamic\Methods.ISO8601TimeSpan.cs" />
+    <Compile Include="Jil\DeserializeDynamic\Methods.ThunkReader.cs" />
+    <Compile Include="Jil\DeserializeDynamic\ObjectBuilder.cs" />
+    <Compile Include="Jil\Deserialize\AnonymousTypeLookup.cs" />
+    <Compile Include="Jil\Deserialize\DeserializeIndirect.cs" />
+    <Compile Include="Jil\Deserialize\EnumLookup.cs" />
+    <Compile Include="Jil\Deserialize\InlineDeserializer.cs" />
+    <Compile Include="Jil\Deserialize\InterfaceImplementation.cs" />
+    <Compile Include="Jil\Deserialize\Methods.cs" />
+    <Compile Include="Jil\Deserialize\Methods.Get.cs" />
+    <Compile Include="Jil\Deserialize\Methods.ISO8601DateTime.cs" />
+    <Compile Include="Jil\Deserialize\Methods.ISO8601TimeSpan.cs" />
+    <Compile Include="Jil\Deserialize\Methods.ReadNumbers.cs" />
+    <Compile Include="Jil\Deserialize\Methods.ThunkReader.cs" />
+    <Compile Include="Jil\Deserialize\NameAutomata.cs" />
+    <Compile Include="Jil\Deserialize\SetterLookup.cs" />
+    <Compile Include="Jil\Deserialize\ThunkReader.cs" />
+    <Compile Include="Jil\Deserialize\TypeCaches.cs" />
+    <Compile Include="Jil\InfiniteRecursionException.cs" />
+    <Compile Include="Jil\JilDirectiveAttribute.cs" />
+    <Compile Include="Jil\JSON.cs" />
+    <Compile Include="Jil\Options.cs" />
+    <Compile Include="Jil\SerializationNameFormat.cs" />
+    <Compile Include="Jil\SerializeDynamic\DynamicSerializer.cs" />
+    <Compile Include="Jil\SerializeDynamic\NullTypeCache.cs" />
+    <Compile Include="Jil\SerializeDynamic\OptionsLookup.cs" />
+    <Compile Include="Jil\SerializeDynamic\RecursiveSerializerCache.cs" />
+    <Compile Include="Jil\Serialize\InlineSerializer.cs" />
+    <Compile Include="Jil\Serialize\Methods.cs" />
+    <Compile Include="Jil\Serialize\Methods.Get.cs" />
+    <Compile Include="Jil\Serialize\Methods.ThunkWriter.cs" />
+    <Compile Include="Jil\Serialize\SerializeDynamicThunk.cs" />
+    <Compile Include="Jil\Serialize\ThunkWriter.cs" />
+    <Compile Include="Jil\Serialize\TypeCaches.cs" />
+    <Compile Include="Jil\UnspecifiedDateTimeKindBehavior.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -59,8 +116,10 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Jil\OptionsGeneration.linq" />
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
