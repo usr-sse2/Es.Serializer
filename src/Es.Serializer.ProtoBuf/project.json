@@ -1,0 +1,46 @@
+﻿{
+  "version": "1.0.0-*",
+  "name": "Es.Serializer.ProtoBuf",
+  "title": "Es.Serializer.ProtoBuf",
+  "description": "Easy Serializer",
+  "authors": [ "EsWork", "v.la@live.cn" ],
+  "packOptions": {
+    "summary": "Easy Work Serializer for .NET",
+    "owners": [ "v.la@live.cn" ],
+    "tags": [ "Serializer" ],
+    "projectUrl": "https://github.com/EsWork/Es.Serializer",
+    "licenseUrl": "https://github.com/EsWork/Es.Serializer/blob/master/LICENSE",
+    "requireLicenseAcceptance": false,
+    "repository": {
+      "type": "git",
+      "url": "git://github.com//EsWork/Es.Serializer"
+    }
+  },
+  "buildOptions": {
+    "define": [ "NETCORE" ],
+    "debugType": "portable",
+    "warningsAsErrors": true,
+    "keyFile": "../Es.snk"
+  },
+
+  "dependencies": {
+    "Es.Serializer": "1.0.0-*",
+    "protobuf-net": "2.1.0"
+  },
+
+
+  "frameworks": {
+    "netstandard1.6": {
+      "imports": [
+        "dotnet5.6",
+        "portable-net451+win8"
+      ],
+      "dependencies": {
+        "NETStandard.Library": "1.6.0-*"
+      }
+    },
+    "net45": {
+      "buildOptions": { "define": [ "NET45" ] }
+    }
+  }
+}

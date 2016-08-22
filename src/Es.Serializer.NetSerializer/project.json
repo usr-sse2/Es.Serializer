@@ -1,0 +1,47 @@
+﻿{
+  "version": "1.0.0-*",
+  "name": "Es.Serializer.NetSerializer",
+  "title": "Es.Serializer.NetSerializer",
+  "description": "Easy Serializer",
+  "authors": [ "EsWork", "v.la@live.cn" ],
+  "packOptions": {
+    "summary": "Easy Work Serializer for .NET",
+    "owners": [ "v.la@live.cn" ],
+    "tags": [ "Serializer" ],
+    "projectUrl": "https://github.com/EsWork/Es.Serializer",
+    "licenseUrl": "https://github.com/EsWork/Es.Serializer/blob/master/LICENSE",
+    "requireLicenseAcceptance": false,
+    "repository": {
+      "type": "git",
+      "url": "git://github.com//EsWork/Es.Serializer"
+    }
+  },
+  "buildOptions": {
+    "allowUnsafe": true,
+    "define": [ "NETCORE" ],
+    "debugType": "portable",
+    "warningsAsErrors": true,
+    "keyFile": "../Es.snk"
+  },
+
+  "dependencies": {
+    "Es.Serializer": "1.0.0-*"
+  },
+
+
+  "frameworks": {
+    "net45": {
+      "buildOptions": { "define": [ "NET45" ] },
+      "dependencies": {
+
+      },
+      "frameworkAssemblies": {
+        "System": "4.0.0.0",
+        "System.Core": "4.0.0.0",
+        "System.Xml": "4.0.0.0",
+        "System.Runtime": "4.0.0.0",
+        "System.Runtime.Serialization": "4.0.0.0"
+      }
+    }
+  }
+}

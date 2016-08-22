@@ -1,0 +1,42 @@
+{
+  "version": "1.0.0-*",
+
+  "dependencies": {
+    "xunit": "2.2.0-*",
+    "protobuf-net": "2.1.0",
+    "Es.Serializer": "1.0.0",
+    "Es.Serializer.ProtoBuf": "1.0.0-*",
+    "Es.Serializer.JsonNet": "1.0.0-*"
+  },
+  "testRunner": "xunit",
+  "frameworks": {
+    "netcoreapp1.0": {
+      "imports": [
+        "dnxcore50",
+        "portable-net451+win8"
+      ],
+      "dependencies": {
+        "Microsoft.NETCore.App": {
+          "version": "1.0.0-*",
+          "type": "platform"
+        },
+        "dotnet-test-xunit": "2.2.0-*"
+      }
+    },
+    "net45": {
+      "buildOptions": { "define": [ "NET45" ] },
+      "dependencies": {
+        "Es.Serializer.NetSerializer": "1.0.0-*",
+        "Es.Serializer.Jil": "1.0.0-*"
+      },
+      "frameworkAssemblies": {
+        "System": "4.0.0.0",
+        "System.Core": "4.0.0.0",
+        "System.Xml": "4.0.0.0",
+        "System.Runtime": "4.0.0.0",
+        "System.Runtime.Serialization": "4.0.0.0",
+        "System.Runtime.Serialization.Formatters.Soap": "4.0.0.0"
+      }
+    }
+  }
+}
