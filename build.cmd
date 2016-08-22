@@ -1,55 +1,12 @@
-@echo off
-setlocal
-title Es.Serializer Build
-echo.
-echo "++++++++++++++++++++++++++++++++++++++++++++++++++++"
-echo "+       Es.Serializer Build       
-echo "+                                   
-echo "+           v.la@Live.cn                           
-echo "+                                   
-echo "++++++++++++++++++++++++++++++++++++++++++++++++++++"
-:menu
-echo.
-echo [1]   Build Lib
-echo [2]   Build Nuget
-echo [h]   psake help
-echo [0]   Exit
-echo.
-@echo Please select?
-@echo Enter the above option to enter
-@echo off
+call dotnet restore src/Es.Serializer
+call dotnet restore src/Es.Serializer.Jil
+call dotnet restore src/Es.Serializer.JsonNet
+call dotnet restore src/Es.Serializer.NetSerializer
+call dotnet restore src/Es.Serializer.ProtoBuf
 
-set /p menu=
 
-if %menu% == 0 goto exit
-if %menu% == 1 goto 1
-if %menu% == 2 goto 2
-if %menu% == h goto help
-goto :eof
-
-:1
-powershell -NoProfile -ExecutionPolicy Bypass -Command "& '%~dp0tools\psake\psake.ps1' build.ps1 %*; if ($psake.build_success -eq $false) { exit 1 } else { exit 0 }"
-echo.
-echo Build ok!
-echo.
-set menu=
-goto menu
-
-:2
-powershell -NoProfile -ExecutionPolicy Bypass -Command "& '%~dp0tools\psake\psake.ps1' build-nuget.ps1 %*; if ($psake.build_success -eq $false) { exit 1 } else { exit 0 }"
-
-call nuget-push.cmd
-
-echo.
-echo Build ok!
-echo.
-set menu=
-goto menu
-
-:help
-powershell -NoProfile -ExecutionPolicy Bypass -Command "& '%~dp0tools\psake\psake.ps1' -help"
-goto menu
-
-:exit
-goto :eof
-
+call dotnet pack --configuration release src/Es.Serializer  -o artifacts
+call dotnet pack --configuration release src/Es.Serializer.Jil  -o artifacts
+call dotnet pack --configuration release src/Es.Serializer.JsonNet  -o artifacts
+call dotnet pack --configuration release src/Es.Serializer.NetSerializer  -o artifacts
+call dotnet pack --configuration release src/Es.Serializer.ProtoBuf  -o artifacts
