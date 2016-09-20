@@ -1,5 +1,5 @@
 ﻿{
-  "version": "1.0.0",
+  "version": "1.0.1",
   "name": "Es.Serializer",
   "title": "Es.Serializer",
   "description": "Easy Serializer",
@@ -23,6 +23,14 @@
     "keyFile": "../Es.snk"
   },
 
+
+  "runtimes": {
+    "win7-x64": {},
+    "win10-x64": {},
+    "win81-x64": {},
+    "centos.7-x64": {}
+  },
+
   "frameworks": {
     "netstandard1.6": {
       "imports": [
@@ -31,10 +39,7 @@
       ],
       "dependencies": {
         "NETStandard.Library": "1.6.0-*",
-        "System.Runtime.Serialization.Xml": "4.1.0",
-        "System.Runtime.Serialization.Formatters": "4.0.0-*",
-        "System.Xml.XmlSerializer": "4.0.11-*",
-        "System.Private.DataContractSerialization": "4.1.1"
+        "System.Xml.XmlSerializer": "4.0.11-*"
       }
     },
     "net45": {
