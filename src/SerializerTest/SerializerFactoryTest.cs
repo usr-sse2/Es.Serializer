@@ -8,18 +8,18 @@ namespace SerializerTest
         [Fact]
         public void Can_Set_Default() {
             var xml = SerializerFactory.Default;
-            var dc = SerializerFactory.Get("dc");
-            SerializerFactory.SetDefault(dc);
+            var xml2 = new XmlSerializer();
+            SerializerFactory.SetDefault(xml2);
 
             var def = SerializerFactory.Default;
 
             Assert.NotEqual(xml, def);
-            Assert.Equal(dc, def);
+            Assert.Equal(xml2, def);
 
             SerializerFactory.SetDefault(xml);
             def = SerializerFactory.Default;
 
-            Assert.NotEqual(dc, def);
+            Assert.NotEqual(xml2, def);
             Assert.Equal(xml, def);
         }
 

@@ -27,21 +27,23 @@ namespace PerformanceTest
              {"Binary",new CallAct()},
              {"Soap",new CallAct()},
              {"NET",new CallAct()},
+             {"DataContract",new CallAct()}
             #endif
-            {"DataContract",new CallAct()}
+           
         };
 
 #if NET45
         JilSerializer jilserializer = new JilSerializer();
         BinarySerializer binaryserializer = new BinarySerializer();
         SoapSerializer soapserializer = new SoapSerializer();
+        DataContractSerializer datacontractserializer = new DataContractSerializer();
 #endif
 
         JsonNetSerializer jsonnetserializer = new JsonNetSerializer();
         ProtoBufSerializer protobufserializer = new ProtoBufSerializer();
         XmlSerializer xmlserializer = new XmlSerializer();
 
-        DataContractSerializer datacontractserializer = new DataContractSerializer();
+        
 
 
         [Test("Serializers Performance Test")]
@@ -107,6 +109,11 @@ namespace PerformanceTest
             using (MemoryStream mem = new MemoryStream()) {
                 netserializer.Serialize(obj, mem);
             }
+
+                        using (MemoryStream mem = new MemoryStream()) {
+                datacontractserializer.Serialize(obj, mem);
+            }
+
 #endif
 
             jsonnetserializer.SerializeToString(obj);
@@ -115,9 +122,6 @@ namespace PerformanceTest
             }
             xmlserializer.SerializeToString(obj);
 
-            using (MemoryStream mem = new MemoryStream()) {
-                datacontractserializer.Serialize(obj, mem);
-            }
 
             var keys = serializer.Keys.ToList();
 
@@ -162,6 +166,19 @@ namespace PerformanceTest
                     }
                 }, runs);
             };
+
+            
+            serializer["DataContract"].Act = () =>
+            {
+                GC.Collect(2, GCCollectionMode.Forced, blocking: true);
+                serializer["DataContract"].Score = Helper.AverageRuntime(() =>
+                {
+                    using (MemoryStream mem = new MemoryStream()) {
+                        datacontractserializer.Serialize(obj, mem);
+                    }
+                }, runs);
+            };
+
 #endif
 
             serializer["Json"].Act = () =>
@@ -192,20 +209,6 @@ namespace PerformanceTest
                     }
                 }, runs);
             };
-
-
-
-            serializer["DataContract"].Act = () =>
-            {
-                GC.Collect(2, GCCollectionMode.Forced, blocking: true);
-                serializer["DataContract"].Score = Helper.AverageRuntime(() =>
-                {
-                    using (MemoryStream mem = new MemoryStream()) {
-                        datacontractserializer.Serialize(obj, mem);
-                    }
-                }, runs);
-            };
-
 
 
             keys.ForEach(k =>
@@ -239,6 +242,11 @@ namespace PerformanceTest
                 netserializer.Serialize(obj, mem);
                 netData = mem.ToArray();
             }
+
+             using (MemoryStream mem = new MemoryStream()) {
+                datacontractserializer.Serialize(obj, mem);
+                dataContractData = mem.ToArray();
+            }
 #endif
 
             var jsonnetSerializedText = jsonnetserializer.SerializeToString(obj);
@@ -247,10 +255,7 @@ namespace PerformanceTest
                 protobufserializer.Serialize(obj, mem);
                 protobufData = mem.ToArray();
             }
-            using (MemoryStream mem = new MemoryStream()) {
-                datacontractserializer.Serialize(obj, mem);
-                dataContractData = mem.ToArray();
-            }
+           
 
 
             var keys = serializer.Keys.ToList();
@@ -297,6 +302,18 @@ namespace PerformanceTest
                     }
                 }, runs);
             };
+           
+            serializer["DataContract"].Act = () =>
+            {
+                GC.Collect(2, GCCollectionMode.Forced, blocking: true);
+                serializer["DataContract"].Score = Helper.AverageRuntime(() =>
+                {
+                    using (MemoryStream mem = new MemoryStream(dataContractData)) {
+                        datacontractserializer.Deserialize(mem, objType);
+                    }
+                }, runs);
+            };
+
 #endif
 
 
@@ -331,16 +348,6 @@ namespace PerformanceTest
             };
 
 
-            serializer["DataContract"].Act = () =>
-            {
-                GC.Collect(2, GCCollectionMode.Forced, blocking: true);
-                serializer["DataContract"].Score = Helper.AverageRuntime(() =>
-                {
-                    using (MemoryStream mem = new MemoryStream(dataContractData)) {
-                        datacontractserializer.Deserialize(mem, objType);
-                    }
-                }, runs);
-            };
 
 
 

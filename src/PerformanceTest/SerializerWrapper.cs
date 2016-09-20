@@ -14,8 +14,10 @@ namespace PerformanceTest
     {
 
         private static ProtoBufSerializer _protoBufSerializer = new ProtoBufSerializer();
-
-        [NonSerialized, IgnoreDataMember, JsonIgnore, ProtoIgnore]
+#if NET45
+        [NonSerialized]
+#endif
+        [IgnoreDataMember, JsonIgnore, ProtoIgnore]
         private object _value;
 
         public SerializerWrapper() {

@@ -30,6 +30,11 @@ namespace SerializerTest
         public void Can_Jil_deep_clone() {
             Test_Deep_Clone(SerializerFactory.Get("jil"));
         }
+
+        [Fact]
+        public void Can_dc_deep_clone() {
+            Test_Deep_Clone(SerializerFactory.Get("dc"));
+        }
 #endif
 
         [Fact]
@@ -41,13 +46,6 @@ namespace SerializerTest
         public void Can_ProtoBuf_deep_clone() {
             Test_Deep_Clone(SerializerFactory.Get("ProtoBuf"));
         }
-
-        [Fact]
-        public void Can_dc_deep_clone() {
-            Test_Deep_Clone(SerializerFactory.Get("dc"));
-        }
-
-
 
         [Fact]
         public void Can_xml_deep_clone() {

@@ -28,11 +28,13 @@ namespace Es.Serializer
 
         private static XmlSerializer _xml;
 
-        private static DataContractSerializer _dataContract;
+
 
         private static ObjectSerializerBase _default;
 
 #if NET45
+
+        private static DataContractSerializer _dataContract;
 
         private static SoapSerializer _soap;
 
@@ -50,13 +52,14 @@ namespace Es.Serializer
             _soap = new SoapSerializer();
             _objectSerializerCache["soap"] = _soap;
             _objectSerializerCache["binary"] = _binary;
-#endif
-            _xml = new XmlSerializer();
-            _dataContract = new DataContractSerializer();
 
-            _objectSerializerCache["xml"] = _xml;
+             _dataContract = new DataContractSerializer();
+           
             _objectSerializerCache["DataContract"] = _dataContract;
             _objectSerializerCache["dc"] = _dataContract;
+#endif
+            _xml = new XmlSerializer();
+            _objectSerializerCache["xml"] = _xml;
 
             _default = _xml;
         }

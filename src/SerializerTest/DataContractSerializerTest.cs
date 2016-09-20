@@ -4,6 +4,7 @@ using Xunit;
 
 namespace SerializerTest
 {
+#if NET45
     public class DataContractSerializerTest
     {
 
@@ -64,4 +65,5 @@ namespace SerializerTest
             Assert.Equal(foo1.ToString(), foo2.ToString());
         }
     }
+#endif
 }
