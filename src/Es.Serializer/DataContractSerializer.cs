@@ -12,9 +12,10 @@
  *
  * ---------------------------------------------------------------------------
  * */
-
+#if NET45
 using System;
 using System.IO;
+using System.Runtime.Serialization;
 
 namespace Es.Serializer
 {
@@ -90,3 +91,4 @@ namespace Es.Serializer
         }
     }
 }
+ #endif
