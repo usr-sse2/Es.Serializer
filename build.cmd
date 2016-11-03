@@ -6,17 +6,17 @@ call dotnet restore src/Es.Serializer.JsonNet
 call dotnet restore src/Es.Serializer.NetSerializer
 call dotnet restore src/Es.Serializer.ProtoBuf
 
-call dotnet build -f netstandard1.6 -c release src/Es.Serializer  -o artifacts/netstandard1.6
-call dotnet build -f netstandard1.6 -c release src/Es.Serializer.Jil  -o artifacts/netstandard1.6
-call dotnet build -f netstandard1.6 -c release src/Es.Serializer.JsonNet  -o artifacts/netstandard1.6
-call dotnet build -f netstandard1.6 -c release src/Es.Serializer.NetSerializer  -o artifacts/netstandard1.6
-call dotnet build -f netstandard1.6 -c release src/Es.Serializer.ProtoBuf  -o artifacts/netstandard1.6
+call dotnet build -f netstandard1.6 -c release src/Es.Serializer  -b artifacts
+call dotnet build -f netstandard1.6 -c release src/Es.Serializer.Jil  -b artifacts
+call dotnet build -f netstandard1.6 -c release src/Es.Serializer.JsonNet -b artifacts
+call dotnet build -f netstandard1.6 -c release src/Es.Serializer.NetSerializer -b artifacts
+call dotnet build -f netstandard1.6 -c release src/Es.Serializer.ProtoBuf -b artifacts
 
-call dotnet build -f net45 -c release src/Es.Serializer  -o artifacts/net45
-call dotnet build -f net45 -c release src/Es.Serializer.Jil  -o artifacts/net45
-call dotnet build -f net45 -c release src/Es.Serializer.JsonNet  -o artifacts/net45
-call dotnet build -f net45 -c release src/Es.Serializer.NetSerializer  -o artifacts/net45
-call dotnet build -f net45 -c release src/Es.Serializer.ProtoBuf  -o artifacts/net45
+call dotnet build -f net45 -c release src/Es.Serializer -b artifacts
+call dotnet build -f net45 -c release src/Es.Serializer.Jil -b artifacts
+call dotnet build -f net45 -c release src/Es.Serializer.JsonNet  -b artifacts
+call dotnet build -f net45 -c release src/Es.Serializer.NetSerializer -b artifacts
+call dotnet build -f net45 -c release src/Es.Serializer.ProtoBuf -b artifacts
 
 call dotnet pack -c release src/Es.Serializer  -o artifacts
 call dotnet pack -c release src/Es.Serializer.Jil  -o artifacts
