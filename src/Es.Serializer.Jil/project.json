@@ -1,5 +1,5 @@
 ﻿{
-  "version": "1.0.1",
+  "version": "1.0.2",
   "name": "Es.Serializer.Jil",
   "title": "Es.Serializer.Jil",
   "description": "Easy Serializer",
@@ -18,22 +18,21 @@
   },
   "buildOptions": {
     "allowUnsafe": true,
-    "define": [ "NETCORE" ],
     "debugType": "portable",
     "warningsAsErrors": true,
     "keyFile": "../Es.snk"
   },
 
   "dependencies": {
-    "Es.Serializer": "1.0.1"
+    "Es.Serializer": "1.0.2-*"
   },
 
 
   "frameworks": {
     "net45": {
-      "buildOptions": { "define": [ "NET45" ] },
+      "buildOptions": { "define": [ "NETFULL" ] },
       "dependencies": {
-        "Sigil": "4.5.1"
+        "Sigil": "4.7.0"
       },
       "frameworkAssemblies": {
         "System": "4.0.0.0",

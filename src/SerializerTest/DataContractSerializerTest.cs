@@ -4,7 +4,7 @@ using Xunit;
 
 namespace SerializerTest
 {
-#if NET45
+#if NETFULL
     public class DataContractSerializerTest
     {
 

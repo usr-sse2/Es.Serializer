@@ -1,5 +1,5 @@
 ﻿{
-  "version": "1.0.1",
+  "version": "1.0.2",
   "name": "Es.Serializer.JsonNet",
   "title": "Es.Serializer.JsonNet",
   "description": "Easy Serializer",
@@ -17,30 +17,26 @@
     }
   },
   "buildOptions": {
-    "define": [ "NETCORE" ],
     "debugType": "portable",
     "warningsAsErrors": true,
     "keyFile": "../Es.snk"
   },
 
   "dependencies": {
-    "Es.Serializer": "1.0.1",
-    "Newtonsoft.Json": "9.0.1"
+    "Es.Serializer": "1.0.2-*",
+    "Newtonsoft.Json": "9.0.1-*"
   },
 
 
   "frameworks": {
     "netstandard1.6": {
-      "imports": [
-        "dotnet5.6",
-        "portable-net451+win8"
-      ],
+      "buildOptions": { "define": [ "NETSTANDARD" ] },
       "dependencies": {
-        "NETStandard.Library": "1.6.0-*"
+        "NETStandard.Library": "1.6.1-*"
       }
     },
     "net45": {
-      "buildOptions": { "define": [ "NET45" ] }
+      "buildOptions": { "define": [ "NETFULL" ] }
     }
   }
 }

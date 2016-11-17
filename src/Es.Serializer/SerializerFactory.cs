@@ -32,7 +32,7 @@ namespace Es.Serializer
 
         private static ObjectSerializerBase _default;
 
-#if NET45
+#if NETFULL
 
         private static DataContractSerializer _dataContract;
 
@@ -47,7 +47,7 @@ namespace Es.Serializer
         /// </summary>
         static SerializerFactory() {
             _objectSerializerCache = new Dictionary<string, ObjectSerializerBase>(StringComparer.OrdinalIgnoreCase);
-#if NET45
+#if NETFULL
             _binary = new BinarySerializer();
             _soap = new SoapSerializer();
             _objectSerializerCache["soap"] = _soap;

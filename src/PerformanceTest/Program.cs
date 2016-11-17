@@ -9,7 +9,7 @@ namespace PerformanceTest
     public class Program
     {
         public static void Main(string[] args) {
-#if NET45
+#if NETFULL
             SerializerFactory.AddSerializer<JilSerializer>("jil");
             NetSerializer.Serializer instance = new NetSerializer.Serializer(new[] { typeof(Foo), typeof(SerializerWrapper) });
             NETSerializer ns = new NETSerializer(instance);

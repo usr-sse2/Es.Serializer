@@ -22,7 +22,7 @@ namespace PerformanceTest
             {"Json",new CallAct()},
             {"Protobuf",new CallAct()},
             {"Xml",new CallAct()},
-            #if NET45
+            #if NETFULL
              {"Jil",new CallAct()},
              {"Binary",new CallAct()},
              {"Soap",new CallAct()},
@@ -32,7 +32,7 @@ namespace PerformanceTest
            
         };
 
-#if NET45
+#if NETFULL
         JilSerializer jilserializer = new JilSerializer();
         BinarySerializer binaryserializer = new BinarySerializer();
         SoapSerializer soapserializer = new SoapSerializer();
@@ -96,7 +96,7 @@ namespace PerformanceTest
 
             //warm-up
 
-#if NET45
+#if NETFULL
             jilserializer.SerializeToString(obj);
             using (MemoryStream mem = new MemoryStream()) {
                 binaryserializer.Serialize(obj, mem);
@@ -125,7 +125,7 @@ namespace PerformanceTest
 
             var keys = serializer.Keys.ToList();
 
-#if NET45
+#if NETFULL
             serializer["Jil"].Act = () =>
                         {
                             GC.Collect(2, GCCollectionMode.Forced, blocking: true);
@@ -226,7 +226,7 @@ namespace PerformanceTest
 
             byte[] protobufData, binaryData, dataContractData, soapData, netData;
 
-#if NET45
+#if NETFULL
             var jilSerializedText = jilserializer.SerializeToString(obj);
             using (MemoryStream mem = new MemoryStream()) {
                 binaryserializer.Serialize(obj, mem);
@@ -260,7 +260,7 @@ namespace PerformanceTest
 
             var keys = serializer.Keys.ToList();
 
-#if NET45
+#if NETFULL
             serializer["Jil"].Act = () =>
                       {
                           GC.Collect(2, GCCollectionMode.Forced, blocking: true);

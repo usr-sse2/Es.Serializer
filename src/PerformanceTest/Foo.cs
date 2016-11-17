@@ -4,7 +4,7 @@ using ProtoBuf;
 
 namespace PerformanceTest
 {
-#if NET45
+#if NETFULL
     [Serializable]
 #endif
     [DataContract, ProtoContract]
@@ -35,7 +35,7 @@ namespace PerformanceTest
         }
     }
 
-#if NET45
+#if NETFULL
     [Serializable]
 #endif
     [DataContract, ProtoContract]

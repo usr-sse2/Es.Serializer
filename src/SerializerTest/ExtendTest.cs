@@ -6,7 +6,7 @@ namespace SerializerTest
     public class ExtendTest
     {
         public ExtendTest() {
-#if NET45
+#if NETFULL
             SerializerFactory.AddSerializer<JilSerializer>("jil");
 #endif
             SerializerFactory.AddSerializer<JsonNetSerializer>("jsonNet");
@@ -20,7 +20,7 @@ namespace SerializerTest
             Assert.NotEqual(foo, foo2);
             Assert.Equal(foo.ToString(), foo2.ToString());
         }
-#if NET45
+#if NETFULL
         [Fact]
         public void Can_soap_deep_clone() {
             Test_Deep_Clone(SerializerFactory.Get("soap"));

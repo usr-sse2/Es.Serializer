@@ -13,7 +13,7 @@
  * ---------------------------------------------------------------------------
  * */
 
-#if NET45
+#if NETFULL
 using System;
 using System.IO;
 using System.Runtime.Serialization;

@@ -6,7 +6,7 @@ namespace SerializerTest
 {
     public class SoapSerializerTest
     {
-#if NET45
+#if NETFULL
         [Fact]
         public void Can_Soap_Serializer_String() {
             var bs = SerializerFactory.Get("soap");

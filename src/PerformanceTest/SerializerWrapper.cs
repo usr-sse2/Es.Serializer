@@ -6,7 +6,7 @@ using ProtoBuf;
 
 namespace PerformanceTest
 {
-#if NET45
+#if NETFULL
     [Serializable]
 #endif
     [ProtoContract]
@@ -14,7 +14,7 @@ namespace PerformanceTest
     {
 
         private static ProtoBufSerializer _protoBufSerializer = new ProtoBufSerializer();
-#if NET45
+#if NETFULL
         [NonSerialized]
 #endif
         [IgnoreDataMember, JsonIgnore, ProtoIgnore]

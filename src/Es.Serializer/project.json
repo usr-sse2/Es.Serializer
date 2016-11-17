@@ -1,5 +1,5 @@
 ﻿{
-  "version": "1.0.1",
+  "version": "1.0.2",
   "name": "Es.Serializer",
   "title": "Es.Serializer",
   "description": "Easy Serializer",
@@ -17,8 +17,8 @@
     }
   },
   "buildOptions": {
-    "define": [ "NETCORE" ],
     "debugType": "portable",
+    "xmlDoc": true,
     "warningsAsErrors": true,
     "keyFile": "../Es.snk"
   },
@@ -33,23 +33,20 @@
 
   "frameworks": {
     "netstandard1.6": {
-      "imports": [
-        "dotnet5.6",
-        "portable-net451+win8"
-      ],
+      "buildOptions": { "define": [ "NETSTANDARD" ] },
       "dependencies": {
-        "NETStandard.Library": "1.6.0-*",
-        "System.Xml.XmlSerializer": "4.0.11-*"
+        "NETStandard.Library": "1.6.1-*",
+        "System.Xml.XmlSerializer": "4.3.0-*"
       }
     },
     "net45": {
-      "buildOptions": { "define": [ "NET45" ] },
+      "buildOptions": { "define": [ "NETFULL" ] },
       "frameworkAssemblies": {
-        "System": "",
-        "System.Core": "",
-        "System.Xml": "",
-        "System.Runtime.Serialization": "",
-        "System.Runtime.Serialization.Formatters.Soap": ""
+        "System": "4.0.0.0",
+        "System.Core": "4.0.0.0",
+        "System.Xml": "4.0.0.0",
+        "System.Runtime.Serialization": "4.0.0.0",
+        "System.Runtime.Serialization.Formatters.Soap": "4.0.0.0"
       }
     }
   }
