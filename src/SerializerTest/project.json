@@ -3,9 +3,9 @@
     "xunit": "2.2.0-*",
     "dotnet-test-xunit": "2.2.0-*",
     "protobuf-net": "2.1.0-*",
-    "Es.Serializer": "1.0.2-*",
-    "Es.Serializer.ProtoBuf": "1.0.2-*",
-    "Es.Serializer.JsonNet": "1.0.2-*"
+    "Es.Serializer": "1.0.3-*",
+    "Es.Serializer.ProtoBuf": "1.0.3-*",
+    "Es.Serializer.JsonNet": "1.0.3-*"
   },
   "testRunner": "xunit",
   "frameworks": {
@@ -25,8 +25,8 @@
     "net451": {
       "buildOptions": { "define": [ "NETFULL" ] },
       "dependencies": {
-        "Es.Serializer.NetSerializer": "1.0.2",
-        "Es.Serializer.Jil": "1.0.2"
+        "Es.Serializer.NetSerializer": "1.0.3",
+        "Es.Serializer.Jil": "1.0.3"
       },
       "frameworkAssemblies": {
         "System": "4.0.0.0",

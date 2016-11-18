@@ -1,5 +1,5 @@
 ﻿{
-  "version": "1.0.2",
+  "version": "1.0.3",
   "name": "Es.Serializer.JsonNet",
   "title": "Es.Serializer.JsonNet",
   "description": "Easy Serializer",
@@ -23,17 +23,19 @@
   },
 
   "dependencies": {
-    "Es.Serializer": "1.0.2-*",
-    "Newtonsoft.Json": "9.0.1-*"
+    "Es.Serializer": "1.0.3-*",
+    "Newtonsoft.Json": "9.0.1"
   },
 
-
   "frameworks": {
-    "netstandard1.6": {
+    "netstandard1.3": {
       "buildOptions": { "define": [ "NETSTANDARD" ] },
       "dependencies": {
         "NETStandard.Library": "1.6.1-*"
       }
+    },
+    "net40": {
+      "buildOptions": { "define": [ "NETFULL" ] }
     },
     "net45": {
       "buildOptions": { "define": [ "NETFULL" ] }
