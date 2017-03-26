@@ -1,21 +1,21 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26228.9
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Es.Serializer", "Es.Serializer\Es.Serializer.xproj", "{50635F40-1267-4329-83C1-BB69CC839827}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Es.Serializer", "Es.Serializer\Es.Serializer.csproj", "{50635F40-1267-4329-83C1-BB69CC839827}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Es.Serializer.Jil", "Es.Serializer.Jil\Es.Serializer.Jil.xproj", "{992D18EC-853F-4DCB-A5F7-8B787CA38D74}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Es.Serializer.Jil", "Es.Serializer.Jil\Es.Serializer.Jil.csproj", "{992D18EC-853F-4DCB-A5F7-8B787CA38D74}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Es.Serializer.JsonNet", "Es.Serializer.JsonNet\Es.Serializer.JsonNet.xproj", "{EFE09FB6-62B1-4418-ABBB-A637B53DBFD5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Es.Serializer.JsonNet", "Es.Serializer.JsonNet\Es.Serializer.JsonNet.csproj", "{EFE09FB6-62B1-4418-ABBB-A637B53DBFD5}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Es.Serializer.ProtoBuf", "Es.Serializer.ProtoBuf\Es.Serializer.ProtoBuf.xproj", "{379A1D01-7B05-4ED7-A3A5-387D3A29A815}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Es.Serializer.ProtoBuf", "Es.Serializer.ProtoBuf\Es.Serializer.ProtoBuf.csproj", "{379A1D01-7B05-4ED7-A3A5-387D3A29A815}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "PerformanceTest", "PerformanceTest\PerformanceTest.xproj", "{17492391-B508-49F0-99C6-20471F89772B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PerformanceTest", "PerformanceTest\PerformanceTest.csproj", "{17492391-B508-49F0-99C6-20471F89772B}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "SerializerTest", "SerializerTest\SerializerTest.xproj", "{C4F490B8-1815-4B47-BE41-E0B2ABDF7970}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SerializerTest", "SerializerTest\SerializerTest.csproj", "{C4F490B8-1815-4B47-BE41-E0B2ABDF7970}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Es.Serializer.NetSerializer", "Es.Serializer.NetSerializer\Es.Serializer.NetSerializer.xproj", "{6CE689E3-BD06-41C1-A008-807D6695A4E3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Es.Serializer.NetSerializer", "Es.Serializer.NetSerializer\Es.Serializer.NetSerializer.csproj", "{6CE689E3-BD06-41C1-A008-807D6695A4E3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

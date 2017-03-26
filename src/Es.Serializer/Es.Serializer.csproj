@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\..\build\common.props" />
+  <PropertyGroup>
+    <AssemblyName>Es.Serializer</AssemblyName>
+    <AssemblyTitle>Es.Serializer</AssemblyTitle>
+    <TargetFrameworks>netstandard1.3;net40;net45</TargetFrameworks>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <DebugType>portable</DebugType>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PackageId>Es.Serializer</PackageId>
+  </PropertyGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.3' ">
+    <PackageReference Include="System.Collections" Version="$(CoreFxVersion)" />
+    <PackageReference Include="System.IO" Version="$(CoreFxVersion)" />
+    <PackageReference Include="System.Runtime.Extensions" Version="$(CoreFxVersion)" />
+    <PackageReference Include="System.Threading" Version="$(CoreFxVersion)" />
+    <PackageReference Include="System.Xml.XmlSerializer" Version="$(CoreFxVersion)" />
+    <PackageReference Include="System.Runtime.InteropServices" Version="$(CoreFxVersion)" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net40' OR '$(TargetFramework)' == 'net45' ">
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Runtime.Serialization.Formatters.Soap" />
+    <Reference Include="Microsoft.CSharp" />
+  </ItemGroup>
+
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.3' ">
+    <DefineConstants>$(DefineConstants);NETSTANDARD</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net40' OR '$(TargetFramework)' == 'net45' ">
+    <DefineConstants>$(DefineConstants);NETFULL</DefineConstants>
+  </PropertyGroup>
+</Project>
