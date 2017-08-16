@@ -35,6 +35,22 @@ namespace Jil
         /// constructing the final object.
         /// </summary>
         public Type TreatEnumerationAs { get; set; }
+        /// <summary>
+        /// If true then multiple members (each of a different type) can have the same Name, forming a discriminant union.
+        /// This can be used to handle JSON which puts different types of values under the same key.
+        /// 
+        /// When deserializing if Jil encounters a value under the name of a union, it will set whichever member has a matching type.
+        /// When serializing, Jil will check each member under the name of the union and write whichever one has a non-default value.
+        /// </summary>
+        public bool IsUnion { get; set; }
+        /// <summary>
+        /// If true, and the annotated member is a Type, and the annotated member is part of a union then:
+        ///   - the annotated member will be set to whichever Type was deserialized for the indicated union
+        ///   - if no value was provided, the annotated member will be null
+        ///   
+        /// There can be only one member of a union which has IsUnionType set.
+        /// </summary>
+        public bool IsUnionType { get; set; }
 
         /// <summary>
         /// Create a new JilDirectiveAttribute
@@ -66,4 +82,13 @@ namespace Jil
             TreatEnumerationAs = serializeEnumAs;
         }
     }
+
+    /// <summary>
+    /// Marks the given class as a simple wrapper around primitive type.
+    /// The marked class should either:
+    /// - have a non default ctor, with this only value.
+    /// - have only one property or field, which will be used to set and read primitive value from.
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
+    public class JilPrimitiveWrapper : Attribute { }
 }

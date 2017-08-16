@@ -39,6 +39,13 @@ namespace Jil.SerializeDynamic
             return cached;
         }
 
+        static string EnforceSerializationName(string name, Options opts)
+        {
+            if (opts.SerializationNameFormat == SerializationNameFormat.Verbatim) return name;
+
+            return name.ToCamelCase();
+        }
+
         static readonly ParameterExpression CachedParameterExp = Expression.Parameter(typeof(object));
         static void SerializeDynamicObject(IDynamicMetaObjectProvider dyn, TextWriter stream, Options opts, int depth)
         {
@@ -55,9 +62,10 @@ namespace Jil.SerializeDynamic
             if (asJilDyn != null)
             {
                 var first = true;
-                foreach (var memberName in asJilDyn.GetMemberNames())
+                foreach (var rawMemberName in asJilDyn.GetMemberNames())
                 {
-                    var val = asJilDyn.GetMember(memberName);
+                    var val = asJilDyn.GetMember(rawMemberName);
+                    var memberName = EnforceSerializationName(rawMemberName, opts);
 
                     if (val == null && opts.ShouldExcludeNulls) continue;
 
@@ -91,9 +99,10 @@ namespace Jil.SerializeDynamic
                 var metaObj = dyn.GetMetaObject(CachedParameterExp);
 
                 var first = true;
-                foreach (var memberName in metaObj.GetDynamicMemberNames())
+                foreach (var rawMemberName in metaObj.GetDynamicMemberNames())
                 {
-                    var getter = GetGetMember(dynType, memberName);
+                    var getter = GetGetMember(dynType, rawMemberName);
+                    var memberName = EnforceSerializationName(rawMemberName, opts);
                     var val = getter(dyn);
 
                     if (val == null && opts.ShouldExcludeNulls) continue;
@@ -206,7 +215,7 @@ namespace Jil.SerializeDynamic
             emit.LoadArgument(1);                                   // Action<TextWriter, Type, int> TextWriter
             emit.LoadArgument(2);                                   // Action<TextWriter, Type, int> TextWriter object
 
-            if (type.IsValueType)
+            if (type.IsValueType())
             {
                 emit.UnboxAny(type);                                // Action<TextWriter, Type, int> TextWriter type
             }
@@ -477,6 +486,12 @@ namespace Jil.SerializeDynamic
             var jilDyn = dyn as Jil.DeserializeDynamic.JsonObject;
             if (jilDyn != null)
             {
+                if (jilDyn.IsAmbiguousAsDateTime())
+                {
+                    dt = DateTime.MinValue;
+                    return false;
+                }
+
                 return jilDyn.TryCastDateTime(out dt);
             }
 
@@ -517,6 +532,12 @@ namespace Jil.SerializeDynamic
             var jilDyn = dyn as Jil.DeserializeDynamic.JsonObject;
             if (jilDyn != null)
             {
+                if (jilDyn.IsAmbiguousAsDateTime())
+                {
+                    dt = DateTimeOffset.MinValue;
+                    return false;
+                }
+
                 return jilDyn.TryCastDateTimeOffset(out dt);
             }
 
@@ -731,6 +752,18 @@ namespace Jil.SerializeDynamic
                     return false;
                 }
                 catch { }
+                try
+                {
+                    var otherDictType = ((object)dyn).GetType().GetDictionaryInterface();
+                    // aha, you implement IDictionary<T, V>, but do so in a way we can't cast to!
+                    if (otherDictType != null)
+                    {
+                        var key = otherDictType.GetGenericArguments()[0];
+                        // ok, your key is something we can work with, so indicate that this thing could be a Dictionary
+                        if (key.IsStringyType() || key.IsEnum()) return false;
+                    }
+                }
+                catch { }
 
                 return true;
             }
@@ -755,10 +788,14 @@ namespace Jil.SerializeDynamic
                 return;
             }
 
+            // if the names are camel case, we have to munge the members and _that_
+            //    means we have to treat ExpandoObject and IDictionary<string, object> differently
+            var canTreatExpandoAsDictionary = opts.SerializationNameFormat != SerializationNameFormat.CamelCase;
+
             var dynObject = obj as IDynamicMetaObjectProvider;
             // we can treat ExpandoObject as a static IDictionary<string, object> and 
             //   serialize much more quickly (no try/catch control flow)
-            if (dynObject != null && !(dynObject is ExpandoObject))
+            if (dynObject != null && !(canTreatExpandoAsDictionary && dynObject is ExpandoObject))
             {
                 bool bit;
                 if(CanBeBool(dynObject, out bit))

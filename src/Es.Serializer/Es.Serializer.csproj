@@ -4,7 +4,7 @@
   <PropertyGroup>
     <AssemblyName>Es.Serializer</AssemblyName>
     <AssemblyTitle>Es.Serializer</AssemblyTitle>
-    <TargetFrameworks>netstandard1.3;net40;net45</TargetFrameworks>
+    <TargetFrameworks>netstandard1.3;netstandard2.0;net40;net45</TargetFrameworks>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <DebugType>portable</DebugType>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -12,12 +12,12 @@
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.3' ">
-    <PackageReference Include="System.Collections" Version="$(CoreFxVersion)" />
-    <PackageReference Include="System.IO" Version="$(CoreFxVersion)" />
-    <PackageReference Include="System.Runtime.Extensions" Version="$(CoreFxVersion)" />
-    <PackageReference Include="System.Threading" Version="$(CoreFxVersion)" />
-    <PackageReference Include="System.Xml.XmlSerializer" Version="$(CoreFxVersion)" />
-    <PackageReference Include="System.Runtime.InteropServices" Version="$(CoreFxVersion)" />
+    <PackageReference Include="System.Collections" Version="4.3.0" />
+    <PackageReference Include="System.IO" Version="4.3.0" />
+    <PackageReference Include="System.Runtime.Extensions" Version="4.3.0" />
+    <PackageReference Include="System.Threading" Version="4.3.0" />
+    <PackageReference Include="System.Xml.XmlSerializer" Version="4.3.0" />
+    <PackageReference Include="System.Runtime.InteropServices" Version="4.3.0" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net40' OR '$(TargetFramework)' == 'net45' ">
@@ -29,7 +29,7 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
 
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.3' ">
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.3'  OR '$(TargetFramework)' == 'netstandard2.0' ">
     <DefineConstants>$(DefineConstants);NETSTANDARD</DefineConstants>
   </PropertyGroup>
 

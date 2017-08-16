@@ -13,7 +13,7 @@ using System.Runtime.CompilerServices;
 
 namespace Jil.Common
 {
-    partial class Utils
+    class Utils
     {
 #if DEBUG
         public const bool DoVerify = true;
@@ -21,6 +21,9 @@ namespace Jil.Common
         public const bool DoVerify = false;
 #endif
         public const OptimizationOptions DelegateOptimizationOptions = OptimizationOptions.All & ~OptimizationOptions.EnableBranchPatching;
+
+        public const string ExceptionDataKeyPrefix = "Jil-";
+        public const string ExceptionMessageDataKey = ExceptionDataKeyPrefix + nameof(Exception.Message);
 
         private static readonly Dictionary<int, OpCode> OneByteOps;
         private static readonly Dictionary<int, OpCode> TwoByteOps;
@@ -60,19 +63,21 @@ namespace Jil.Common
         //   declaration order.
         internal static int[] MemberOrdering = new int[] { -1, 3, 4, -2 };
 
-        public static List<MemberInfo> IdealMemberOrderForWriting(Type forType, IEnumerable<Type> recursiveTypes, IEnumerable<MemberInfo> members)
+        public static List<List<MemberInfo>> IdealMemberOrderForWriting(Type forType, IEnumerable<Type> recursiveTypes, IEnumerable<List<MemberInfo>> members)
         {
             var fields = Utils.FieldOffsetsInMemory(forType);
             var props = Utils.PropertyFieldUsage(forType);
 
-            var simpleTypes = members.Where(m => m.ReturnType().IsValueType && !m.ReturnType().IsNullableType() && m.ReturnType().IsPrimitiveType()).ToList();
-            var otherPrimitive = members.Where(m => (m.ReturnType().IsPrimitiveType() || m.ReturnType().IsNullableType()) && !simpleTypes.Contains(m)).ToList();
-            var recursive = members.Where(m => recursiveTypes.Contains(m.ReturnType()) && !simpleTypes.Contains(m) && !otherPrimitive.Contains(m)).ToList();
+            var simpleTypes = members.Where(m => m.First().ReturnType().IsValueType() && !m.First().ReturnType().IsNullableType() && m.First().ReturnType().IsPrimitiveType()).ToList();
+            var otherPrimitive = members.Where(m => (m.First().ReturnType().IsPrimitiveType() || m.First().ReturnType().IsNullableType()) && !simpleTypes.Contains(m)).ToList();
+            var recursive = members.Where(m => recursiveTypes.Contains(m.First().ReturnType()) && !simpleTypes.Contains(m) && !otherPrimitive.Contains(m)).ToList();
             var everythingElse = members.Where(m => !simpleTypes.Contains(m) && !otherPrimitive.Contains(m) && !recursive.Contains(m)).ToList();
 
-            Func<MemberInfo, int> byAccessOrder =
-                m =>
+            Func<List<MemberInfo>, int> byAccessOrder =
+                ms =>
                 {
+                    var m = ms.First();
+
                     var asField = m as FieldInfo;
                     if (asField != null)
                     {
@@ -114,9 +119,15 @@ namespace Jil.Common
                     return int.MaxValue;
                 };
 
-            Func<MemberInfo, int> fieldsFirst = m => m is FieldInfo ? 0 : 1;
+            Func<List<MemberInfo>, int> fieldsFirst =
+                ms =>
+                {
+                    var m = ms.First();
 
-            var ret = new List<MemberInfo>();
+                    return m is FieldInfo ? 0 : 1;
+                };
+
+            var ret = new List<List<MemberInfo>>();
 
             foreach (var ix in MemberOrdering)
             {
@@ -166,21 +177,22 @@ namespace Jil.Common
 
         public static Dictionary<PropertyInfo, List<FieldInfo>> PropertyFieldUsage(Type t)
         {
+#if NETCORE
+            return new Dictionary<PropertyInfo, List<FieldInfo>>();
+#else
             var ret = new Dictionary<PropertyInfo, List<FieldInfo>>();
 
             var props = t.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic).Where(p => p.GetMethod != null && p.GetMethod.GetParameters().Count() == 0);
 
-            var module = t.Module;
+            var module = t.Module();
 
             foreach (var prop in props)
             {
                 try
                 {
                     var getMtd = prop.GetMethod;
-                    var mtdBody = getMtd.GetMethodBody();
-                    var il = mtdBody.GetILAsByteArray();
 
-                    var fieldHandles = _GetFieldHandles(il);
+                    var fieldHandles = _GetFieldHandles(getMtd);
 
                     var fieldInfos =
                         fieldHandles
@@ -199,10 +211,14 @@ namespace Jil.Common
             }
 
             return ret;
+#endif
         }
-
+        
         public static List<Tuple<OpCode, int?, long?, double?, FieldInfo>> Decompile(MethodBase mtd)
         {
+#if NETCORE
+            return null;
+#else
             var mtdBody = mtd.GetMethodBody();
             if (mtdBody == null) return null;
             var cil = mtdBody.GetILAsByteArray();
@@ -232,10 +248,17 @@ namespace Jil.Common
             }
 
             return ret;
+#endif
         }
 
-        private static List<int> _GetFieldHandles(byte[] cil)
+        private static List<int> _GetFieldHandles(MethodInfo mtd)
         {
+#if NETCORE
+            return new List<int>();
+#else
+            var mtdBody = mtd.GetMethodBody();
+            var cil = mtdBody.GetILAsByteArray();
+
             var ret = new List<int>();
 
             int i = 0;
@@ -255,6 +278,7 @@ namespace Jil.Common
             }
 
             return ret;
+#endif
         }
 
         private static int _ReadOp(byte[] cil, int ix, out int? fieldHandle, out OpCode opcode, out int? intOperand, out long? longOperand, out double? doubleOperand)
@@ -498,6 +522,127 @@ namespace Jil.Common
         /// <summary>
         /// This returns a map of "name of member" => [Type of member, index of argument to constructor].
         /// We need this for anonymous types because we can't set properties (they're read-only).
+        /// </summary>
+        public static Dictionary<string, Tuple<Type, int>> GetAnonymousNameToConstructorMap(Type objType)
+        {
+            var cons = objType.GetConstructors().Single();
+            var consInstrs = Utils.Decompile(cons);
+
+            if (consInstrs != null)
+            {
+                return GetAnonymousNameToConstructorMap_Decompile(objType, cons, consInstrs);
+            }
+
+            // If we're in a case where the decompiler isn't available (right now, that means you NETCORE)
+            //   then we fall back to guessing.
+            // It's possible to fail here, which sucks, but is better than just not deserializing
+            //   anonymous types
+
+            return GetAnonymousNameToConstructorMap_Guess(objType, cons);
+        }
+
+        /// <summary>
+        /// This returns a map of "name of member" => [Type of member, index of argument to constructor].
+        /// We need this for anonymous types because we can't set properties (they're read-only).
+        /// 
+        /// How this works is kind of fun.
+        /// 
+        /// By spec, the arguments to the constructor are in declaration order for an anonymous type.
+        /// So: new { A, B, C } => new SomeType(A a, B b, C c)
+        /// 
+        /// However there is no way to get declaration order via reflection, it's just not data that's
+        /// preserved.  Furthermore, the names of backing fields for those read-only properties are not
+        /// defined by the spec.
+        /// 
+        /// IF we have decompliation facilities, then we can do this "properly" (see GetAnonymousNameToConstructorMap_Decompile).
+        /// But if we don't, we can still take a decent guess.
+        /// 
+        /// First, group properties by type.  If there are no duplicate types, then there's a one-to-one mapping between
+        /// each parameter to the constructor and each property.
+        /// 
+        /// For groups with multiple properties, compare the names of the property and the constructor parameter.  Take
+        /// exact matches, assuming there aren't any collisions (don't think that's possible, but just in case...).
+        /// 
+        /// This sort of exact matching isn't supported by the spec at all, but works for current implementations so
+        /// as long as there's a "oh shit, invariant broken"-bail I'm OK with it.
+        /// </summary>
+        static Dictionary<string, Tuple<Type, int>> GetAnonymousNameToConstructorMap_Guess(Type objType, ConstructorInfo cons)
+        {
+            var props = objType.GetProperties();
+            var conParams = cons.GetParameters();
+
+            var remainingProps = new List<PropertyInfo>();
+            remainingProps.AddRange(props);
+
+            var remainingParams = new List<ParameterInfo>();
+            remainingParams.AddRange(conParams);
+
+            var propertyToParam = new Dictionary<PropertyInfo, ParameterInfo>();
+
+            foreach (var group in remainingProps.GroupBy(p => p.PropertyType).ToList())
+            {
+                if (group.Count() == 1)
+                {
+                    var prop = group.ElementAt(0);
+                    var param = conParams.Single(p => p.ParameterType == prop.PropertyType);
+
+                    propertyToParam[prop] = param;
+
+                    remainingProps.Remove(prop);
+                }
+            }
+
+            var keepTrying = remainingProps.Count > 0;
+
+            while (keepTrying)
+            {
+                keepTrying = false;
+
+                foreach (var group in remainingProps.GroupBy(p => p.PropertyType).ToList())
+                {
+                    var propType = group.Key;
+
+                    var candidateParams = remainingParams.Where(p => p.ParameterType == propType).ToList();
+
+                    foreach (var prop in group)
+                    {
+                        var exactMatch = candidateParams.Where(p => p.Name == prop.Name).ToList();
+                        if (exactMatch.Count == 1)
+                        {
+                            var matchingParam = exactMatch[0];
+                            propertyToParam[prop] = matchingParam;
+
+                            remainingProps.Remove(prop);
+
+                            remainingParams.Remove(matchingParam);
+                            candidateParams.Remove(matchingParam);
+
+                            keepTrying = true;
+                        }
+                    }
+                }
+            }
+
+            if (remainingProps.Count > 0)
+            {
+                throw new ConstructionException("Due to a limitation in .netcore - could not guess property <-> parameter mapping necessary to deserialize an anonymous type");
+            }
+
+            var ret = new Dictionary<string, Tuple<Type, int>>();
+
+            foreach (var prop in props)
+            {
+                var pairedParam = propertyToParam[prop];
+                var paramIndex = Array.IndexOf(conParams, pairedParam);
+                ret[prop.Name] = Tuple.Create(prop.PropertyType, -1);
+            }
+
+            return ret;
+        }
+
+        /// <summary>
+        /// This returns a map of "name of member" => [Type of member, index of argument to constructor].
+        /// We need this for anonymous types because we can't set properties (they're read-only).
         /// 
         /// How this works is kind of fun.
         /// 
@@ -515,12 +660,8 @@ namespace Jil.Common
         /// Then it finally works backwards from each property, taking the property's name type and using it's backing
         /// field to lookup which index to pass it in as when constructing the anonymous object.
         /// </summary>
-        public static Dictionary<string, Tuple<Type, int>> GetAnonymousNameToConstructorMap(Type objType)
+        static Dictionary<string, Tuple<Type, int>> GetAnonymousNameToConstructorMap_Decompile(Type objType, ConstructorInfo cons, List<Tuple<OpCode, int?, long?, double?, FieldInfo>> consInstrs)
         {
-            var cons = objType.GetConstructors().Single();
-
-            var consInstrs = Utils.Decompile(cons);
-
             var fieldToArgumentIndex = new Dictionary<FieldInfo, int>();
 
             var fields = objType.GetFields(BindingFlags.Instance | BindingFlags.NonPublic);
@@ -774,7 +915,7 @@ namespace Jil.Common
                 var curType = curNode.Value;
 
                 // these can't have members, bail
-                if (curType.IsPrimitiveType() || curType.IsEnum) continue;
+                if (curType.IsPrimitiveType() || curType.IsEnum()) continue;
 
                 if (curType.IsNullableType())
                 {
@@ -849,7 +990,7 @@ namespace Jil.Common
                 var curType = pending.Pop();
 
                 // these can't have members, bail
-                if (curType.IsPrimitiveType() || curType.IsEnum) continue;
+                if (curType.IsPrimitiveType() || curType.IsEnum()) continue;
 
                 if (!counts.ContainsKey(curType)) counts[curType] = 0;
                 counts[curType]++;
@@ -910,7 +1051,7 @@ namespace Jil.Common
                 reused
                     .Where(
                         r => !(r.IsPrimitiveType() ||   // all the types we handle extra specially
-                               r.IsEnum || 
+                               r.IsEnum() || 
                                r.IsNullableType() ||
                                r.IsListType() ||
                                r.IsDictionaryType() ||
@@ -1297,6 +1438,280 @@ namespace Jil.Common
             if (power < PowersOf10.Length)
                 return PowersOf10[power];
             return (long)Math.Pow(10, power);
+        }
+
+        public static bool CheckUnionLegality(DateTimeFormat dateFormat, string memberName, IEnumerable<MemberInfo> possible, out Dictionary<char, MemberInfo> discriminantChars, out MemberInfo destinationType, out Dictionary<UnionCharsets, MemberInfo> charsetToMember, out bool allowsNull, out string errorMessage)
+        {
+            charsetToMember = new Dictionary<UnionCharsets, MemberInfo>();
+            allowsNull = false;
+            destinationType = null;
+
+            var charsToMembers = new Dictionary<char, List<MemberInfo>>();
+
+            foreach (var member in possible)
+            {
+                var attr = member.GetCustomAttribute<JilDirectiveAttribute>();
+                if (attr == null || !attr.IsUnion)
+                {
+                    discriminantChars = null;
+                    errorMessage = "Member [" + member.Name + "] isn't marked as part of a union, but other members share the same Name [" + memberName + "]";
+                    return false;
+                }
+
+                if (attr.IsUnionType)
+                {
+                    if (member.ReturnType() != typeof(Type))
+                    {
+                        discriminantChars = null;
+                        errorMessage = "Member [" + member.Name + "] has IsUnionType set, but is not of type System.Type";
+                        return false;
+                    }
+
+                    var asProp = member as PropertyInfo;
+                    if (asProp != null && asProp.SetMethod == null)
+                    {
+                        discriminantChars = null;
+                        errorMessage = "Member [" + member.Name + "] has IsUnionType set, but has no set method";
+                        return false;
+                    }
+
+                    if (destinationType != null)
+                    {
+                        discriminantChars = null;
+                        errorMessage = "Member [" + member.Name + "] has IsUnionType set, but IsUnionType is also set for [" + destinationType.Name + "]";
+                        return false;
+                    }
+
+                    destinationType = member;
+                    continue;
+                }
+
+                var memberType = member.ReturnType();
+                if (!memberType.IsValueType() || memberType.IsNullableType())
+                {
+                    allowsNull = true;
+                }
+
+                UnionCharsets perMember;
+                var dis = GetDescriminantCharacters(memberType, dateFormat, out perMember);
+                foreach (var e in Enum.GetValues(typeof(UnionCharsets)).Cast<UnionCharsets>().Where(x => perMember.HasFlag(x)))
+                {
+                    charsetToMember[e] = member;
+                }
+
+                charsetToMember[perMember] = member;
+
+                foreach (var c in dis)
+                {
+                    List<MemberInfo> mems;
+                    if (!charsToMembers.TryGetValue(c, out mems))
+                    {
+                        charsToMembers[c] = mems = new List<MemberInfo>();
+                    }
+
+                    mems.Add(member);
+                }
+            }
+
+            var ambiguousCharsToMembers = charsToMembers.Where(kv => kv.Value.Count > 1).ToDictionary(kv => kv.Key, kv => new MemberGroup(kv.Value));
+            if(ambiguousCharsToMembers.Any())
+            {
+                var conflicts = 
+                    ambiguousCharsToMembers
+                        .GroupBy(kv => kv.Value)
+                        .Select(
+                            g => 
+                                Tuple.Create(
+                                    g.Select(kv => kv.Key).Distinct().OrderBy(_ => _).ToList(), 
+                                    g.Key.Members
+                                )
+                        )
+                        .ToList();
+
+                errorMessage =
+                    string.Join("; ",
+                        conflicts
+                            .Select(
+                                t =>
+                                    "The members  [" +
+                                        string.Join(", ", t.Item2.Select(m => m.Name)) +
+                                    "] cannot be distiguished in a union because they can each start with these characters [" +
+                                        string.Join(", ", t.Item1) +
+                                    "]"
+                            )
+                            .OrderBy(_ => _)
+                    );
+
+                discriminantChars = null;
+                return false;
+            }
+
+            discriminantChars = charsToMembers.ToDictionary(kv => kv.Key, kv => kv.Value.Single());
+            errorMessage = null;
+            return true;
+        }
+
+        class MemberGroup : IEquatable<MemberGroup>
+        {
+            public List<MemberInfo> Members {get; private set;}
+
+            public MemberGroup(List<MemberInfo> members)
+            {
+                Members = members;
+            }
+
+            public void Add(MemberInfo member)
+            {
+                Members.Add(member);
+            }
+
+            public override bool Equals(object other)
+            {
+                var asMemberGroup = other as MemberGroup;
+                if(asMemberGroup == null) return false;
+
+                return Equals(asMemberGroup);
+            }
+
+            public override int GetHashCode()
+            {
+                return Members.Select(m => m.GetHashCode()).OrderBy(_ => _).Aggregate((cur, val) => cur ^ val);
+            }
+
+            public bool Equals(MemberGroup other)
+            {
+                if (other.Members.Count != this.Members.Count) return false;
+
+                return this.Members.All(m => other.Members.Contains(m));
+            }
+        }
+
+        static IEnumerable<char> GetDescriminantCharacters(Type memType, DateTimeFormat dateFormat, out UnionCharsets charsets)
+        {
+            charsets = UnionCharsets.None;
+
+            IEnumerable<char> ret = Enumerable.Empty<char>();
+
+            if (memType.IsNullableType())
+            {
+                memType = Nullable.GetUnderlyingType(memType);
+            }
+
+            if (memType.IsNumberType())
+            {
+                if (memType.IsSigned() || memType.IsFloatingPointNumberType())
+                {
+                    charsets |= UnionCharsets.Signed;
+                    ret = ret.Concat(UnionCharsetArrays.UnionSignedSet);
+                }
+
+                charsets |= UnionCharsets.Number;
+                ret = ret.Concat(UnionCharsetArrays.UnionNumberSet);
+
+                return ret;
+            }
+
+            if (memType.IsStringyType() || memType == typeof(Guid))
+            {
+                charsets |= UnionCharsets.Stringy;
+                ret = ret.Concat(UnionCharsetArrays.UnionStringySet);
+
+                return ret;
+            }
+
+            if (memType == typeof(bool))
+            {
+                charsets |= UnionCharsets.Bool;
+                ret = ret.Concat(UnionCharsetArrays.UnionBoolSet);
+
+                return ret;
+            }
+
+            if (memType == typeof(DateTime) || memType == typeof(DateTimeOffset) || memType == typeof(TimeSpan))
+            {
+                switch (dateFormat)
+                {
+                    case DateTimeFormat.RFC1123:
+                    case DateTimeFormat.ISO8601:
+                    case DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch:
+                        charsets |= UnionCharsets.Stringy;
+                        ret = ret.Concat(UnionCharsetArrays.UnionStringySet);
+                        break;
+
+                    case DateTimeFormat.MillisecondsSinceUnixEpoch:
+                    case DateTimeFormat.SecondsSinceUnixEpoch:
+                        charsets |= UnionCharsets.Number;
+                        ret = ret.Concat(UnionCharsetArrays.UnionNumberSet);
+                        break;
+
+                    default: throw new Exception("Unexpected DateTimeFormat: " + dateFormat);
+                }
+
+                return ret;
+            }
+
+            if (memType.IsEnum())
+            {
+                var attr = memType.GetCustomAttribute<JilDirectiveAttribute>();
+                if (attr != null && attr.TreatEnumerationAs != null)
+                {
+                    charsets |= UnionCharsets.Number;
+                    ret = ret.Concat(UnionCharsetArrays.UnionNumberSet);
+                    return ret;
+                }
+
+                charsets |= UnionCharsets.Stringy;
+                ret = ret.Concat(UnionCharsetArrays.UnionStringySet);
+                return ret;
+            }
+
+            if (memType.IsDictionaryType() || memType.IsGenericReadOnlyDictionary())
+            {
+                charsets |= UnionCharsets.Object;
+                ret = ret.Concat(UnionCharsetArrays.UnionObjectSet);
+                return ret;
+            }
+
+            if (memType.IsListType() || memType.IsGenericEnumerable() || memType.IsGenericReadOnlyList())
+            {
+                charsets |= UnionCharsets.Listy;
+                ret = ret.Concat(UnionCharsetArrays.UnionListySet);
+                return ret;
+            }
+
+            charsets |= UnionCharsets.Object;
+            ret = ret.Concat(UnionCharsetArrays.UnionObjectSet);
+            return ret;
+        }
+
+        /// <summary>
+        /// Functional-style helper method for creating and initializing a new array.
+        /// </summary>
+        /// <typeparam name="T">The element type of the array.</typeparam>
+        /// <param name="count">The length of the array to create.</param>
+        /// <param name="generator">
+        /// The function used to initialize each element of the array.
+        /// The integer applied to the function represents the index of the element being initialized.
+        /// </param>
+        /// <returns>An array with element type <typeparamref>T</typeparamref> and length <paramref>count</paramref>.</returns>
+        internal static T[] CreateArray<T>(int count, Func<int, T> generator)
+        {
+            if (count < 0)
+            {
+                throw new ArgumentOutOfRangeException("count");
+            }
+            else if (generator == null)
+            {
+                throw new ArgumentNullException("generator");
+            }
+            //Contract.EndContractBlock();
+
+            var arr = new T[count];
+            for (var i = 0; i < arr.Length; i++)
+            {
+                arr[i] = generator(i);
+            }
+            return arr;
         }
     }
 }

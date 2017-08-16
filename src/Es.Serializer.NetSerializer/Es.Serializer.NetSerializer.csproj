@@ -10,14 +10,11 @@
     <DebugType>portable</DebugType>
     <PackageId>Es.Serializer.NetSerializer</PackageId>
   </PropertyGroup>
-
+  
   <ItemGroup>
     <ProjectReference Include="..\Es.Serializer\Es.Serializer.csproj" />
   </ItemGroup>
 
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'net45' ">
-    <DefineConstants>$(DefineConstants);NETFULL</DefineConstants>
-  </PropertyGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
     <Reference Include="System.Runtime" />

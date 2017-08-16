@@ -13,7 +13,7 @@
  * ---------------------------------------------------------------------------
  * */
 
-#if NETFULL
+#if NETFULL || NETSTANDARD2_0
 using System;
 using System.IO;
 using System.Runtime.Serialization;
@@ -36,7 +36,8 @@ namespace Es.Serializer
         /// </summary>
         /// <param name="value">The value.</param>
         /// <param name="output">The output.</param>
-        public override void Serialize(object value, Stream output) {
+        public override void Serialize(object value, Stream output)
+        {
             binaryFormatter.Serialize(output, value);
         }
 
@@ -46,7 +47,8 @@ namespace Es.Serializer
         /// <param name="stream">The stream.</param>
         /// <param name="type">The type.</param>
         /// <returns>System.Object.</returns>
-        public override object Deserialize(Stream stream, Type type) {
+        public override object Deserialize(Stream stream, Type type)
+        {
             return binaryFormatter.Deserialize(stream);
         }
 
@@ -55,8 +57,10 @@ namespace Es.Serializer
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>System.String.</returns>
-        public override string SerializeToString(object value) {
-            using (MemoryStream mem = new MemoryStream()) {
+        public override string SerializeToString(object value)
+        {
+            using (MemoryStream mem = new MemoryStream())
+            {
                 Serialize(value, mem);
                 return ToHex(mem.ToArray());
             }
@@ -68,9 +72,11 @@ namespace Es.Serializer
         /// <param name="serializedText">The serialized text.</param>
         /// <param name="type">The type.</param>
         /// <returns>System.Object.</returns>
-        public override object DeserializeFromString(string serializedText, Type type) {
+        public override object DeserializeFromString(string serializedText, Type type)
+        {
             var data = FromHex(serializedText);
-            using (MemoryStream mem = new MemoryStream(data)) {
+            using (MemoryStream mem = new MemoryStream(data))
+            {
                 return Deserialize(mem, type);
             }
         }
@@ -80,7 +86,8 @@ namespace Es.Serializer
         /// </summary>
         /// <param name="value">The value.</param>
         /// <param name="writer">The writer.</param>
-        protected override void SerializeCore(object value, TextWriter writer) {
+        protected override void SerializeCore(object value, TextWriter writer)
+        {
             writer.Write(SerializeToString(value));
         }
 
@@ -90,10 +97,11 @@ namespace Es.Serializer
         /// <param name="reader">The reader.</param>
         /// <param name="type">The type.</param>
         /// <returns>System.Object.</returns>
-        protected override object DeserializeCore(TextReader reader, Type type) {
+        protected override object DeserializeCore(TextReader reader, Type type)
+        {
             var hex = reader.ReadToEnd();
             return DeserializeFromString(hex, type);
         }
     }
 }
- #endif
+#endif

@@ -28,35 +28,42 @@ namespace Es.Serializer
 
         private static XmlSerializer _xml;
 
-
-
         private static ObjectSerializerBase _default;
 
-#if NETFULL
+#if NETFULL || NETSTANDARD2_0
 
         private static DataContractSerializer _dataContract;
-
-        private static SoapSerializer _soap;
 
         private static BinarySerializer _binary;
 
 #endif
 
+#if NETFULL
+
+        private static SoapSerializer _soap;
+#endif
+
         /// <summary>
         /// Initializes static members of the <see cref="SerializerFactory"/> class.
         /// </summary>
-        static SerializerFactory() {
+        static SerializerFactory()
+        {
             _objectSerializerCache = new Dictionary<string, ObjectSerializerBase>(StringComparer.OrdinalIgnoreCase);
-#if NETFULL
+
+#if NETFULL || NETSTANDARD2_0
             _binary = new BinarySerializer();
-            _soap = new SoapSerializer();
-            _objectSerializerCache["soap"] = _soap;
+
             _objectSerializerCache["binary"] = _binary;
 
-             _dataContract = new DataContractSerializer();
-           
+            _dataContract = new DataContractSerializer();
+
             _objectSerializerCache["DataContract"] = _dataContract;
             _objectSerializerCache["dc"] = _dataContract;
+#endif
+
+#if NETFULL
+            _soap = new SoapSerializer();
+            _objectSerializerCache["soap"] = _soap;
 #endif
             _xml = new XmlSerializer();
             _objectSerializerCache["xml"] = _xml;
@@ -68,10 +75,8 @@ namespace Es.Serializer
         /// Gets the alias.
         /// </summary>
         /// <value>The alias.</value>
-        public static IEnumerable<string> Alias
-        {
-            get
-            {
+        public static IEnumerable<string> Alias {
+            get {
                 return _objectSerializerCache.Keys;
             }
         }
@@ -81,7 +86,8 @@ namespace Es.Serializer
         /// </summary>
         /// <param name="alias">The alias.</param>
         /// <returns>ObjectSerializerBase.</returns>
-        public static ObjectSerializerBase Get(string alias) {
+        public static ObjectSerializerBase Get(string alias)
+        {
             return _objectSerializerCache[alias];
         }
 
@@ -90,7 +96,8 @@ namespace Es.Serializer
         /// </summary>
         /// <param name="alias">The alias.</param>
         /// <returns><c>true</c> if [contains] [the specified alias]; otherwise, <c>false</c>.</returns>
-        public static bool Contains(string alias) {
+        public static bool Contains(string alias)
+        {
             return _objectSerializerCache.ContainsKey(alias);
         }
 
@@ -98,8 +105,7 @@ namespace Es.Serializer
         /// Gets the default.
         /// </summary>
         /// <value>The default.</value>
-        public static ObjectSerializerBase Default
-        {
+        public static ObjectSerializerBase Default {
             get { return _default; }
         }
 
@@ -108,10 +114,12 @@ namespace Es.Serializer
         /// </summary>
         /// <param name="def">The definition.</param>
         /// <returns>ObjectSerializerBase.</returns>
-        public static ObjectSerializerBase SetDefault(ObjectSerializerBase def) {
+        public static ObjectSerializerBase SetDefault(ObjectSerializerBase def)
+        {
             ObjectSerializerBase oldValue, currentValue;
             currentValue = _default;
-            do {
+            do
+            {
                 oldValue = currentValue;
                 currentValue = Interlocked.CompareExchange(ref _default, def, oldValue);
             }
@@ -125,7 +133,8 @@ namespace Es.Serializer
         /// <typeparam name="TSerializer">The type of the t serializer.</typeparam>
         /// <param name="alias">The alias.</param>
         public static void AddSerializer<TSerializer>(string alias)
-           where TSerializer : ObjectSerializerBase {
+           where TSerializer : ObjectSerializerBase
+        {
             AddSerializer<TSerializer>(new[] { alias });
         }
 
@@ -136,7 +145,8 @@ namespace Es.Serializer
         /// <param name="instance">The instance.</param>
         /// <param name="alias">The alias.</param>
         public static void AddSerializer<TSerializer>(TSerializer instance, string alias)
-           where TSerializer : ObjectSerializerBase {
+           where TSerializer : ObjectSerializerBase
+        {
             AddSerializer(instance, new[] { alias });
         }
 
@@ -146,7 +156,8 @@ namespace Es.Serializer
         /// <typeparam name="TSerializer">The type of the t serializer.</typeparam>
         /// <param name="alias">The alias.</param>
         public static void AddSerializer<TSerializer>(string[] alias)
-          where TSerializer : ObjectSerializerBase {
+          where TSerializer : ObjectSerializerBase
+        {
             var instance = Activator.CreateInstance(typeof(TSerializer)) as ObjectSerializerBase;
             AddSerializer(instance, alias);
         }
@@ -158,8 +169,10 @@ namespace Es.Serializer
         /// <param name="instance">The instance.</param>
         /// <param name="alias">The alias.</param>
         public static void AddSerializer<TSerializer>(TSerializer instance, string[] alias)
-          where TSerializer : ObjectSerializerBase {
-            lock (_objectSerializerCache) {
+          where TSerializer : ObjectSerializerBase
+        {
+            lock (_objectSerializerCache)
+            {
                 foreach (var name in alias)
                     _objectSerializerCache[name] = instance;
             }

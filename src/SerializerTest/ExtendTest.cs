@@ -6,9 +6,7 @@ namespace SerializerTest
     public class ExtendTest
     {
         public ExtendTest() {
-#if NETFULL
             SerializerFactory.AddSerializer<JilSerializer>("jil");
-#endif
             SerializerFactory.AddSerializer<JsonNetSerializer>("jsonNet");
             SerializerFactory.AddSerializer<ProtoBufSerializer>("ProtoBuf");
         }
@@ -25,6 +23,7 @@ namespace SerializerTest
         public void Can_soap_deep_clone() {
             Test_Deep_Clone(SerializerFactory.Get("soap"));
         }
+#endif
 
         [Fact]
         public void Can_Jil_deep_clone() {
@@ -35,7 +34,6 @@ namespace SerializerTest
         public void Can_dc_deep_clone() {
             Test_Deep_Clone(SerializerFactory.Get("dc"));
         }
-#endif
 
         [Fact]
         public void Can_jsonNet_deep_clone() {

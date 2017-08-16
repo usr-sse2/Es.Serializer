@@ -4,7 +4,6 @@ using Xunit;
 
 namespace SerializerTest
 {
-#if NETFULL
     public class JilSerializerTest
     {
         public JilSerializerTest() {
@@ -68,5 +67,4 @@ namespace SerializerTest
             Assert.Equal(foo1.ToString(), foo2.ToString());
         }
     }
-#endif
 }

@@ -22,6 +22,7 @@ namespace Jil.Deserialize
         public static bool UseNameAutomataSwitches = true;
         public static bool UseNameAutomataBinarySearch = true;
         public static bool UseFastRFC1123Method = true;
+        public static bool UseFastUnionLookup = true;
 
         const string CharBufferName = "char_buffer";
         const string StringBuilderName = "string_builder";
@@ -94,13 +95,13 @@ namespace Jil.Deserialize
                 involvedTypes.Contains(typeof(float)) ||
                 involvedTypes.Contains(typeof(double)) ||
                 involvedTypes.Contains(typeof(decimal)) ||
-                involvedTypes.Any(t => t.IsEnum) ||
+                involvedTypes.Any(t => t.IsEnum()) ||
                 involvedTypes.Any(t => t.IsUserDefinedType()) ||
-                (!UseNameAutomataForEnums && involvedTypes.Any(t => t.IsEnum));
+                (!UseNameAutomataForEnums && involvedTypes.Any(t => t.IsEnum()));
 
             if (mayNeedStringBuilder)
             {
-                var gonnaUseAStringBuilderAnyway = (!UseNameAutomataForEnums && involvedTypes.Any(t => t.IsEnum));
+                var gonnaUseAStringBuilderAnyway = (!UseNameAutomataForEnums && involvedTypes.Any(t => t.IsEnum()));
 
                 if (!UseCharArrayOverStringBuilder || gonnaUseAStringBuilderAnyway)
                 {
@@ -159,8 +160,8 @@ namespace Jil.Deserialize
             ThrowExpectedButEnded("" + c);
         }
 
-        static readonly ConstructorInfo DeserializationException_Cons_string_ThunkWriter_bool = typeof(DeserializationException).GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, new[] { typeof(string), typeof(ThunkReader).MakeByRefType(), typeof(bool) }, null);
-        static readonly ConstructorInfo DeserializationException_Cons_string_TextReader_bool = typeof(DeserializationException).GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, new[] { typeof(string), typeof(TextReader), typeof(bool) }, null);
+        static readonly ConstructorInfo DeserializationException_Cons_string_ThunkWriter_bool = typeof(DeserializationException).GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, new[] { typeof(string), typeof(ThunkReader).MakeByRefType(), typeof(bool) });
+        static readonly ConstructorInfo DeserializationException_Cons_string_TextReader_bool = typeof(DeserializationException).GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, new[] { typeof(string), typeof(TextReader), typeof(bool) });
         void ThrowStringStreamBool()
         {
             // top of stack is:
@@ -233,6 +234,12 @@ namespace Jil.Deserialize
             Emit.LoadConstant(false);                                   // string TextReader bool
             ThrowStringStreamBool();                                    // DeserializationException
             Emit.Throw();                                               // --empty--
+        }
+
+        void ThrowExpected(char[] cs)
+        {
+            var ps = cs.Cast<object>().ToArray();
+            ThrowExpected(ps);
         }
 
         void ExpectChar(char c)
@@ -880,6 +887,60 @@ namespace Jil.Deserialize
             ReadNumber(primitiveType);
         }
 
+        void ReadPrimitiveTypeWrapper(Type primitiveTypeWrapper)
+        {
+            var primitiveMember = primitiveTypeWrapper.GetPrimitiveWrapperPropertyOrField();
+            Type wrappedType;
+            if (primitiveMember is FieldInfo)
+            {
+                wrappedType = ((FieldInfo)primitiveMember).FieldType;
+            }
+            else
+            {
+                wrappedType = ((PropertyInfo)primitiveMember).PropertyType;
+            }
+
+            var wrapperConst = primitiveTypeWrapper.GetConstructor(new[] { wrappedType });
+            if (wrapperConst != null)
+            {
+                // use ctor
+                ReadPrimitive(wrappedType); // value
+                Emit.NewObject(wrapperConst); // object
+            }
+            else
+            {
+                var defaultConst = primitiveTypeWrapper.GetConstructor(Type.EmptyTypes);
+                if (defaultConst == null)
+                {
+                    throw 
+                        new ConstructionException(
+                            string.Format("Primitive wrapper {0} needs a default constructor, or a constructor taking a single {1} parameter",
+                                primitiveTypeWrapper.FullName,
+                                wrappedType.FullName
+                            )
+                        );
+                }
+                Emit.NewObject(defaultConst);
+                using (var loc = Emit.DeclareLocal(primitiveTypeWrapper))
+                {
+                    // wrapper
+                    Emit.StoreLocal(loc);       // --empty--
+                    Emit.LoadLocal(loc);        // wrapper
+                    ReadPrimitive(wrappedType); // wrapper value
+
+                    if (primitiveMember is FieldInfo)
+                    {
+                        Emit.StoreField((FieldInfo)primitiveMember);    // --empty--
+                    }
+                    else
+                    {
+                        SetProperty((PropertyInfo)primitiveMember);      // --empty--
+                    }
+                    Emit.LoadLocal(loc);        // wrapper
+                }
+            }
+        }
+        
         void ConsumeWhiteSpace()
         {
             Emit.LoadArgument(0);                                       // TextReader
@@ -939,8 +1000,33 @@ namespace Jil.Deserialize
             Emit.Call(specific);            // enum
         }
 
-        void ReadEnum(Type enumType)
+        void ReadEnum(Type enumType, bool cameFromNullable)
         {
+            if (Enum.GetNames(enumType).Count() == 0)
+            {
+                if (cameFromNullable)
+                {
+                    var message = enumType.FullName + "  has no defined values and thus cannot be deserialized";
+                    var constr = ReadingFromString ?
+                        DeserializationException_Cons_string_ThunkWriter_bool :
+                        DeserializationException_Cons_string_TextReader_bool;
+
+                    // need to proxy this through a different method, just so Sigil can't tell
+                    //   it's unreachable code
+                    var mtd = Methods.GetThrowNoDefinedValueInEnum(ReadingFromString);
+
+                    Emit.LoadConstant(message);     // string
+                    Emit.LoadArgument(0);           // TextReader
+                    Emit.Call(mtd);                 // --empty--
+
+                    // fall through
+                }
+                else
+                {
+                    throw new ConstructionException(enumType.FullName + " has no values, and cannot be deserialized; add a value, make nullable, or configure to treat as integer");
+                }
+            }
+
             if (UseNameAutomataForEnums)
             {
                 var setterLookup = typeof(EnumLookup<>).MakeGenericType(enumType);
@@ -1045,7 +1131,7 @@ namespace Jil.Deserialize
                 Emit.LoadConstant('n');             // int n
                 Emit.BranchIfEqual(maybeNull);      // --empty--
 
-                Build(nullableMember, underlying);                  // underlying
+                Build(nullableMember, underlying, fromNullable: true);  // underlying
                 Emit.NewObject(nullableConst);      // nullableType
                 Emit.Branch(done);                  // nullableType
 
@@ -1063,13 +1149,25 @@ namespace Jil.Deserialize
             }
         }
 
-        void ReadList(MemberInfo listMember, Type listType)
+        void ReadList(MemberInfo listMember, Type listType, bool isSet)
         {
-            var elementType = listType.GetListInterface().GetGenericArguments()[0];
+            var elementType = isSet 
+                ? listType.GetSetInterface().GetGenericArguments()[0]
+                : listType.GetListInterface().GetGenericArguments()[0];
 
-            if (listType.IsGenericType && listType.GetGenericTypeDefinition() == typeof(IList<>))
+            if (listType.IsGenericType())
             {
-                listType = typeof(List<>).MakeGenericType(elementType);
+                if (!isSet && listType.GetGenericTypeDefinition() == typeof(IList<>))
+                {
+                    listType = typeof(List<>).MakeGenericType(elementType);
+                }
+                else
+                {
+                    if (isSet && listType.GetGenericTypeDefinition() == typeof(ISet<>))
+                    {
+                        listType = typeof(HashSet<>).MakeGenericType(elementType);
+                    }
+                }
             }
 
             var addMtd = listType.GetMethod("Add");
@@ -1093,7 +1191,7 @@ namespace Jil.Deserialize
             {
                 Action loadList;
 
-                if (!listType.IsValueType)
+                if (!listType.IsValueType())
                 {
                     loadList = () => Emit.LoadLocal(loc);
 
@@ -1124,7 +1222,7 @@ namespace Jil.Deserialize
                 }
 
                 Emit.MarkLabel(doRead);                 // --empty--
-                if (listType.IsValueType)
+                if (listType.IsValueType())
                 {
                     Emit.LoadLocalAddress(loc);         // listType*
                     Emit.InitializeObject(listType);    // --empty--
@@ -1146,6 +1244,7 @@ namespace Jil.Deserialize
                 Emit.BranchIfEqual(done);                       // listType(*?)
                 Build(listMember, elementType);                             // listType(*?) elementType
                 Emit.CallVirtual(addMtd);                       // --empty--
+                if (isSet) Emit.Pop();                          // if it's a set, Add() returns a bool which we need to pop off the stack
 
                 var startLoop = Emit.DefineLabel();
                 var nextItem = Emit.DefineLabel();
@@ -1169,6 +1268,7 @@ namespace Jil.Deserialize
                 ConsumeWhiteSpace();                // listType(*?)
                 Build(listMember, elementType);                 // listType(*?) elementType
                 Emit.CallVirtual(addMtd);           // --empty--
+                if (isSet) Emit.Pop();              // if it's a set, Add() returns a bool which we need to pop off the stack
                 Emit.Branch(startLoop);             // --empty--
 
                 Emit.MarkLabel(done);               // listType(*?)
@@ -1193,12 +1293,12 @@ namespace Jil.Deserialize
 
             var keyIsString = keyType == typeof(string);
             var keyIsInteger = keyType.IsIntegerNumberType();
-            var keyIsEnum = keyType.IsEnum;
+            var keyIsEnum = keyType.IsEnum();
 
             if (!(keyIsString || keyIsInteger || keyIsEnum)) throw new ConstructionException("Only dictionaries with strings, integers, or enums for keys can be deserialized");
             var valType = dictType.GetDictionaryInterface().GetGenericArguments()[1];
 
-            if (dictType.IsGenericType && dictType.GetGenericTypeDefinition() == typeof(IDictionary<,>))
+            if (dictType.IsGenericType() && dictType.GetGenericTypeDefinition() == typeof(IDictionary<,>))
             {
                 dictType = typeof(Dictionary<,>).MakeGenericType(keyType, valType);
             }
@@ -1208,7 +1308,7 @@ namespace Jil.Deserialize
             var done = Emit.DefineLabel();
             var doneSkipChar = Emit.DefineLabel();
 
-            if (!dictType.IsValueType)
+            if (!dictType.IsValueType())
             {
                 ExpectRawCharOrNull(
                     '{',
@@ -1228,7 +1328,7 @@ namespace Jil.Deserialize
             using (var loc = Emit.DeclareLocal(dictType))
             {
                 Action loadDict;
-                if (dictType.IsValueType)
+                if (dictType.IsValueType())
                 {
                     Emit.LoadLocalAddress(loc);         // dictType*
                     Emit.InitializeObject(dictType);    // --empty--
@@ -1426,7 +1526,7 @@ namespace Jil.Deserialize
             var done = Emit.DefineLabel();
             var doneSkipChar = Emit.DefineLabel();
 
-            if (!objType.IsValueType)
+            if (!objType.IsValueType())
             {
                 ExpectRawCharOrNull(
                     '{',
@@ -1446,7 +1546,7 @@ namespace Jil.Deserialize
             using (var loc = Emit.DeclareLocal(objType))
             {
                 Action loadObj;
-                if (objType.IsValueType)
+                if (objType.IsValueType())
                 {
                     Emit.LoadLocalAddress(loc);     // objType*
                     Emit.InitializeObject(objType); // --empty--
@@ -1468,15 +1568,16 @@ namespace Jil.Deserialize
                 var serializationType = SerializationNameFormat.GetGenericTypeArgument();
 
                 var setterLookup = typeof(SetterLookup<,>).MakeGenericType(objType, serializationType);
+                var setterGetSetters = setterLookup.GetMethod("GetSetters", BindingFlags.Public | BindingFlags.Static);
 
-                var setters = (Dictionary<string, MemberInfo>)setterLookup.GetMethod("GetSetters", BindingFlags.Public | BindingFlags.Static).Invoke(null, new object[0]);
+                var setters = (Dictionary<string, MemberInfo[]>)setterGetSetters.Invoke(null, new object[0]);
 
                 // special case object w/ no deserializable properties
                 if (setters.Count == 0)
                 {
                     loadObj();                          // objType(*?)
 
-                    if (objType.IsValueType)
+                    if (objType.IsValueType())
                     {
                         Emit.LoadObject(objType);       // objType
                     }
@@ -1489,7 +1590,7 @@ namespace Jil.Deserialize
                 var orderedSetters =
                     setters
                     .OrderBy(kv => kv.Key)
-                    .Select((kv, i) => new { Index = i, Name = kv.Key, Setter = kv.Value, Label = Emit.DefineLabel() })
+                    .Select((kv, i) => new { Index = i, Name = kv.Key, Setters = kv.Value, Label = Emit.DefineLabel() })
                     .ToList();
 
                 MethodInfo findSetterIdx;
@@ -1548,35 +1649,24 @@ namespace Jil.Deserialize
 
                 foreach (var kv in orderedSetters)
                 {
+                    var memberName = kv.Name;
                     var label = kv.Label;
-                    var member = kv.Setter;
-                    var memberType = member.ReturnType();
+                    var members = kv.Setters;
 
-                    Emit.MarkLabel(label);      // objType(*?)
-
-                    Type convertEnumTo;
-                    if (memberType.IsEnum && member != null && member.ShouldConvertEnum(memberType, out convertEnumTo))
+                     if (members.Length == 1)
                     {
-                        var underlyingEnumType = Enum.GetUnderlyingType(memberType);
+                        var member = members[0];
 
-                        Build(member, convertEnumTo);   // objType(*?) SerializeEnumerationAsType
-                        Emit.Convert(underlyingEnumType);       // objType(*?) memberType
+                        Emit.MarkLabel(label);      // objType(*?)
+                        ReadAndSetMember(member);   // --empty--
+                        Emit.Branch(loopStart);     // --empty--
                     }
                     else
                     {
-                        Build(member, memberType);          // objType(*?) memberType
+                        Emit.MarkLabel(label);                              // objType(*?)
+                        ReadAndSetDiscriminantUnion(memberName, members);   // --empty--
+                        Emit.Branch(loopStart);                             // --empty--
                     }
-
-                    if (member is FieldInfo)
-                    {
-                        Emit.StoreField((FieldInfo)member); // --empty--
-                    }
-                    else
-                    {
-                        SetProperty((PropertyInfo)member);  // --empty--
-                    }
-
-                    Emit.Branch(loopStart);                 // --empty--
                 }
 
                 var nextItem = Emit.DefineLabel();
@@ -1614,9 +1704,305 @@ namespace Jil.Deserialize
 
             Emit.MarkLabel(doneSkipChar);       // objType(*?)
 
-            if (objType.IsValueType)
+            if (objType.IsValueType())
             {
                 Emit.LoadObject(objType);       // objType
+            }
+        }
+
+        void ReadAndSetMember(MemberInfo member)
+        {
+            // Stack starts
+            // objType(*?)
+
+            var memberType = member.ReturnType();
+
+            var memberAttr = member.GetCustomAttribute<JilDirectiveAttribute>();
+            if (memberType.IsEnum() && memberAttr != null && memberAttr.TreatEnumerationAs != null)
+            {
+                var underlyingEnumType = Enum.GetUnderlyingType(memberType);
+
+                Build(member, memberAttr.TreatEnumerationAs);   // objType(*?) SerializeEnumerationAsType
+                Emit.Convert(underlyingEnumType);       // objType(*?) memberType
+            }
+            else
+            {
+                Build(member, memberType);          // objType(*?) memberType
+            }
+
+            if (member is FieldInfo)
+            {
+                Emit.StoreField((FieldInfo)member); // --empty--
+            }
+            else
+            {
+                SetProperty((PropertyInfo)member);  // --empty--
+            }
+        }
+        
+        static readonly MethodInfo Type_GetTypeFromHandle = typeof(Type).GetMethod("GetTypeFromHandle", BindingFlags.Public | BindingFlags.Static);
+        void ReadAndSetDiscriminantUnion(string memberName, MemberInfo[] union)
+        {
+            Dictionary<char, MemberInfo> discriminants;
+            MemberInfo unionTypeIndicator;
+            Dictionary<UnionCharsets, MemberInfo> charsets;
+            bool allowsNull;
+
+            string errorMessage;
+            if(!Utils.CheckUnionLegality(DateFormat, memberName, union, out discriminants, out unionTypeIndicator, out charsets, out allowsNull, out errorMessage))
+            {
+                throw new ConstructionException(errorMessage);
+            }
+
+            var refMembers = discriminants.Where(kv => !kv.Value.ReturnType().IsValueType()).Select(kv => kv.Value).ToList();
+            var nullableMembers = discriminants.Where(kv => kv.Value.ReturnType().IsNullableType()).Select(kv => kv.Value).ToList();
+            var expected = discriminants.Keys.ToArray();
+
+            var streamNotEmpty = Emit.DefineLabel();
+            var end = Emit.DefineLabel();
+
+            RawPeekChar();                                  // objType(*?) int
+            Emit.Duplicate();                               // objType(*?) int int
+            Emit.LoadConstant(-1);                          // objType(*?) int int -1
+            Emit.UnsignedBranchIfNotEqual(streamNotEmpty);  // objType(*?) int
+
+            ThrowExpectedButEnded(expected);                // --empty--
+
+            Emit.MarkLabel(streamNotEmpty);                 // objType(*?) int
+
+            // _sigh_ strong names fuck with dynamic linking the UnionConfigLookup ASM
+            //    just have to live with it for now
+#if !STRONG_NAME
+            var canUseFastUnionLookup = true;
+#else
+            var canUseFastUnionLookup = false;
+#endif
+
+            if (UseFastUnionLookup && canUseFastUnionLookup)
+            {
+                var allCharsets = UnionCharsets.None;
+                foreach (var kv in charsets)
+                {
+                    allCharsets |= kv.Key;
+                }
+
+                var config = UnionConfigLookup.Get(allCharsets, allowsNull);
+                var lookup = typeof(UnionLookup<>).MakeGenericType(config);
+                
+                var min = (int)lookup.GetField("MinimumChar").GetValue(null);
+                var lookupArr = lookup.GetField("Lookup");
+                var lookupArrLen = ((int[])lookupArr.GetValue(null)).Length;
+                var charsetsInOrder = (UnionCharsets[])lookup.GetField("CharsetOrder").GetValue(null);
+
+                var miss = Emit.DefineLabel();
+                var labels = 
+                    charsetsInOrder
+                        .Select(
+                            c => 
+                            {
+                                MemberInfo member;
+
+                                if (!charsets.TryGetValue(c, out member)) member = null;
+
+                                return Tuple.Create(Emit.DefineLabel(), member, c);
+                            }
+                        )
+                        .ToArray();
+                var labelsArr = labels.Select(t => t.Item1).ToArray();
+
+                Emit.LoadConstant(min);                 // objType(*?) int int
+                Emit.Subtract();                        // objType(*?) int
+                Emit.Duplicate();                       // objType(*?) int int
+                Emit.LoadConstant(lookupArrLen);        // objType(*?) int int int
+                Emit.BranchIfGreaterOrEqual(miss);      // objType(*?) int
+                Emit.Duplicate();                       // objType(*?) int int
+                Emit.LoadConstant(0);                   // objType(*?) int int int
+                Emit.BranchIfLess(miss);                // objType(*?) int
+                using (var loc = Emit.DeclareLocal<int>())
+                {
+                    Emit.StoreLocal(loc);               // objType(*?)
+                    Emit.LoadField(lookupArr);          // objType(*?) int[]
+                    Emit.LoadLocal(loc);                // objType(*?) int[] int
+                }
+                Emit.LoadElement<int>();                // objType(*?) int
+                Emit.Switch(labelsArr);                 // objType(*?)
+
+                // fall through
+                ThrowExpected(expected);                // --empty--
+
+                foreach (var t in labels)
+                {
+                    var label = t.Item1;
+                    var member = t.Item2;
+                    var charset = t.Item3;
+
+                    Emit.MarkLabel(label);                  // objType(*?)
+
+                    if (charset == UnionCharsets.Null)
+                    {
+                        // have to special case null, since it can mean clearning multiple members
+                        //   as there isn't a 1-to-1 type-to-member map for the null value
+
+                        ExpectNullSetMembersToDefaultAndClearUnionTypeIndicator(refMembers, nullableMembers, unionTypeIndicator);
+
+                        Emit.Pop();             // --empty--
+                        Emit.Branch(end);       // --empty--
+                    }
+                    else
+                    {
+                        // set the indicator, __if__ one has actually be registered
+                        //   we don't want to do any work if they don't care to
+                        if (unionTypeIndicator != null)
+                        {
+                            Emit.Duplicate();                           // objType(*?) objType(*?)
+                            Emit.LoadConstant(member.ReturnType());     // objType(*?) objType(*?) RuntimeTypeHandle
+                            Emit.Call(Type_GetTypeFromHandle);          // objType(*?) objType(*?) Type
+
+                            if (unionTypeIndicator is FieldInfo)
+                            {
+                                var asField = (FieldInfo)unionTypeIndicator;
+                                Emit.StoreField(asField);               // objType(*?)
+                            }
+                            else
+                            {
+                                var asProp = (PropertyInfo)unionTypeIndicator;
+                                SetProperty(asProp);                    // objType(*?)
+                            }
+                        }
+
+                        ReadAndSetMember(member);                   // --empty--
+                        Emit.Branch(end);                           // --empty--
+                    }
+                }
+
+                Emit.MarkLabel(miss);           // objType(*?) int
+                ThrowExpected(expected);        // --empty--
+
+                Emit.MarkLabel(end);            // --empty--
+            }
+            else
+            {
+                if (allowsNull)
+                {
+                    var notNull = Emit.DefineLabel();
+
+                    Emit.Duplicate();                           // objType(*?) int int
+                    Emit.LoadConstant('n');                     // objType(*?) int int 'n'
+                    Emit.UnsignedBranchIfNotEqual(notNull);     // objType(*?) int
+
+                    Emit.Pop();
+                    ExpectNullSetMembersToDefaultAndClearUnionTypeIndicator(refMembers, nullableMembers, unionTypeIndicator);
+                    
+                    Emit.Pop();                                 // --empty--
+                    Emit.Branch(end);                           // --empty--
+
+                    Emit.MarkLabel(notNull);                    // objType(*?) int
+                }
+
+                foreach (var charToMember in discriminants)
+                {
+                    var c = charToMember.Key;
+                    var member = charToMember.Value;
+                    var nextChar = Emit.DefineLabel();
+
+                    Emit.Duplicate();                           // objType(*?) int int
+                    Emit.LoadConstant((int)c);                  // objType(*?) int int int
+                    Emit.UnsignedBranchIfNotEqual(nextChar);    // objType(*?) int
+
+                    Emit.Pop();                                 // objType(*?)
+
+                    // set the indicator, __if__ one has actually be registered
+                    //   we don't want to do any work if they don't care to
+                    if (unionTypeIndicator != null)
+                    {
+                        Emit.Duplicate();                           // objType(*?) objType(*?)
+                        Emit.LoadConstant(member.ReturnType());     // objType(*?) objType(*?) RuntimeTypeHandle
+                        Emit.Call(Type_GetTypeFromHandle);          // objType(*?) objType(*?) Type
+
+                        if (unionTypeIndicator is FieldInfo)
+                        {
+                            var asField = (FieldInfo)unionTypeIndicator;
+                            Emit.StoreField(asField);               // objType(*?)
+                        }
+                        else
+                        {
+                            var asProp = (PropertyInfo)unionTypeIndicator;
+                            SetProperty(asProp);                    // objType(*?)
+                        }
+                    }
+
+                    ReadAndSetMember(member);                   // --empty--
+                    Emit.Branch(end);                           // --empty--
+
+                    Emit.MarkLabel(nextChar);                   // objType(*?) int
+                }
+
+                ThrowExpected(expected);                        // --empty--
+
+                Emit.MarkLabel(end);                            // --empty--
+            }
+        }
+
+        void ExpectNullSetMembersToDefaultAndClearUnionTypeIndicator(List<MemberInfo> refMembers, List<MemberInfo> nullableMembers, MemberInfo unionTypeIndicator)
+        {
+            // top of stack
+            // ------------
+            // objType(*?)
+
+            ExpectChar('n');                            // objType(*?)
+            ExpectChar('u');                            // objType(*?)
+            ExpectChar('l');                            // objType(*?)
+            ExpectChar('l');                            // objType(*?)
+
+            foreach (var r in refMembers)
+            {
+                Emit.Duplicate();                       // objType(*?) objType(*?)
+                Emit.LoadNull();                        // objType(*?) objType(*?) null
+                var asProp = r as PropertyInfo;
+                if (asProp != null)
+                {
+                    SetProperty(asProp);                // objType(*?)
+                }
+                else
+                {
+                    Emit.StoreField((FieldInfo)r);      // objType(*?)
+                }
+            }
+
+            foreach (var n in nullableMembers)
+            {
+                Emit.Duplicate();                       // objType(*?) objType(*?)
+                using (var nLoc = Emit.DeclareLocal(n.ReturnType()))
+                {
+                    Emit.LoadLocalAddress(nLoc);            // objType(*?) objType(*?) Nullable<?>*
+                    Emit.InitializeObject(n.ReturnType());  // objType(*?) objType(*?)
+                    Emit.LoadLocal(nLoc);                   // objType(*?) objType(*?) Nullable<?>
+                }
+                var asProp = n as PropertyInfo;
+                if (asProp != null)
+                {
+                    SetProperty(asProp);                // objType(*?)
+                }
+                else
+                {
+                    Emit.StoreField((FieldInfo)n);      // objType(*?)
+                }
+            }
+
+            if (unionTypeIndicator != null)
+            {
+                Emit.Duplicate();                       // objType(*?) objType(*?)
+                Emit.LoadNull();                        // objType(*?) objType(*?) null
+                var asProp = unionTypeIndicator as PropertyInfo;
+                if (asProp != null)
+                {
+                    SetProperty(asProp);                // objType(*?)
+                }
+                else
+                {
+                    var asField = (FieldInfo)unionTypeIndicator;
+                    Emit.StoreField(asField);           // objType(*?)
+                }
             }
         }
 
@@ -1625,7 +2011,7 @@ namespace Jil.Deserialize
             var done = Emit.DefineLabel();
             var doneSkipChar = Emit.DefineLabel();
 
-            if (!objType.IsValueType)
+            if (!objType.IsValueType())
             {
                 ExpectRawCharOrNull(
                     '{',
@@ -1645,7 +2031,7 @@ namespace Jil.Deserialize
             using (var loc = Emit.DeclareLocal(objType))
             {
                 Action loadObj;
-                if (objType.IsValueType)
+                if (objType.IsValueType())
                 {
                     Emit.LoadLocalAddress(loc);     // objType*
                     Emit.InitializeObject(objType); // --empty--
@@ -1668,14 +2054,14 @@ namespace Jil.Deserialize
 
                 var setterLookup = typeof(SetterLookup<,>).MakeGenericType(objType, serializationType);
 
-                var setters = (Dictionary<string, MemberInfo>)setterLookup.GetMethod("GetSetters", BindingFlags.Public | BindingFlags.Static).Invoke(null, new object[0]);
+                var setters = (Dictionary<string, MemberInfo[]>)setterLookup.GetMethod("GetSetters", BindingFlags.Public | BindingFlags.Static).Invoke(null, new object[0]);
 
                 // special case object w/ no deserializable properties
                 if (setters.Count == 0)
                 {
                     loadObj();                      // objType(*?)
 
-                    if (objType.IsValueType)
+                    if (objType.IsValueType())
                     {
                         Emit.LoadObject(objType);   // objType
                     }
@@ -1729,35 +2115,24 @@ namespace Jil.Deserialize
 
                 foreach (var kv in labels)
                 {
+                    var memberName = kv.Key;
                     var label = kv.Value;
-                    var member = setters[kv.Key];
-                    var memberType = member.ReturnType();
+                    var members = setters[kv.Key];
 
-                    Emit.MarkLabel(label);      // objType(*?)
-
-                    Type convertEnumTo;
-                    if (memberType.IsEnum && member != null && member.ShouldConvertEnum(memberType, out convertEnumTo))
+                    if (members.Length == 1)
                     {
-                        var underlyingEnumType = Enum.GetUnderlyingType(memberType);
+                        var member = members[0];
 
-                        Build(member, convertEnumTo);   // objType(*?) SerializeEnumerationAsType
-                        Emit.Convert(underlyingEnumType);       // objType(*?) memberType
+                        Emit.MarkLabel(label);      // objType(*?)
+                        ReadAndSetMember(member);   // --empty--
+                        Emit.Branch(loopStart);     // --empty--
                     }
                     else
                     {
-                        Build(member, memberType);          // objType(*?) memberType
+                        Emit.MarkLabel(label);                              // objType(*?)
+                        ReadAndSetDiscriminantUnion(memberName, members);   // --empty--
+                        Emit.Branch(loopStart);                             // --empty--
                     }
-
-                    if (member is FieldInfo)
-                    {
-                        Emit.StoreField((FieldInfo)member); // --empty--
-                    }
-                    else
-                    {
-                        SetProperty((PropertyInfo)member);  // --empty--
-                    }
-
-                    Emit.Branch(loopStart);                 // --empty--
                 }
 
                 var nextItem = Emit.DefineLabel();
@@ -1793,7 +2168,7 @@ namespace Jil.Deserialize
 
             Emit.MarkLabel(doneSkipChar);       // objType(*?)
 
-            if(objType.IsValueType)
+            if(objType.IsValueType())
             {
                 Emit.LoadObject(objType);       // objType
             }
@@ -2141,7 +2516,7 @@ namespace Jil.Deserialize
             }
         }
 
-        void Build(MemberInfo forMember, Type forType, bool allowRecursion = true)
+        void Build(MemberInfo forMember, Type forType, bool allowRecursion = true, bool fromNullable = false)
         {
             // EXACT MATCH, this is the best way to detect `dynamic`
             if (forType == typeof(object))
@@ -2162,6 +2537,12 @@ namespace Jil.Deserialize
                 return;
             }
 
+            if (forType.IsPrimitiveWrapper())
+            {
+                ReadPrimitiveTypeWrapper(forType);
+                return;
+            }
+
             if (forType.IsDictionaryType())
             {
                 ReadDictionary(forMember, forType);
@@ -2179,7 +2560,13 @@ namespace Jil.Deserialize
 
             if (forType.IsListType())
             {
-                ReadList(forMember, forType);
+                ReadList(forMember, forType, false);
+                return;
+            }
+
+            if (forType.IsSetType())
+            {
+                ReadList(forMember, forType, true);
                 return;
             }
 
@@ -2189,11 +2576,11 @@ namespace Jil.Deserialize
             {
                 var elementType = forType.GetGenericArguments()[0];
                 var fakeList = typeof(List<>).MakeGenericType(elementType);
-                ReadList(forMember, fakeList);
+                ReadList(forMember, fakeList, false);
                 return;
             }
 
-            if (forType.IsEnum)
+            if (forType.IsEnum())
             {
                 Type convertEnumTo;
                 if (forMember != null && forMember.ShouldConvertEnum(forType, out convertEnumTo))
@@ -2205,7 +2592,7 @@ namespace Jil.Deserialize
                     return;
                 }
 
-                ReadEnum(forType);
+                ReadEnum(forType, fromNullable);
                 return;
             }
 

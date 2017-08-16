@@ -14,7 +14,7 @@ namespace Jil.Deserialize
 
     static class SetterLookup<ForType, SerializationNameFormatType>
     {
-        private static readonly IReadOnlyList<Tuple<string, MemberInfo>> _nameOrderedSetters;
+        private static readonly IReadOnlyList<Tuple<string, MemberInfo[]>> _nameOrderedSetters;
         private static Func<TextReader, int> _findMember;
         private static SetterLookupThunkReaderDelegate _findMemberThunkReader;
 
@@ -33,26 +33,69 @@ namespace Jil.Deserialize
             _findMemberThunkReader = CreateFindMemberThunkReader(_nameOrderedSetters.Select(setter => setter.Item1));
         }
 
-        private static IReadOnlyList<Tuple<string, MemberInfo>> GetOrderedSetters()
+        private static IReadOnlyList<Tuple<string, MemberInfo[]>> GetOrderedSetters()
         {
             var forType = typeof(ForType);
             var flags = BindingFlags.Instance | BindingFlags.Public;
-            var serializatioNameFormat = SerializationNameFormat.Verbatim;
-            if (typeof (SerializationNameFormatType) == typeof (SerializationNameFormatCamelCase))
+            var serializationNameFormat = SerializationNameFormat.Verbatim;
+            if (typeof(SerializationNameFormatType) == typeof(SerializationNameFormatCamelCase))
             {
-                serializatioNameFormat = SerializationNameFormat.CamelCase;
+                serializationNameFormat = SerializationNameFormat.CamelCase;
             }
 
             var fields = forType.GetFields(flags).Where(field => field.ShouldUseMember());
             var props = forType.GetProperties(flags).Where(p => p.SetMethod != null && p.ShouldUseMember());
 
-            return
-                fields.Cast<MemberInfo>()
-                .Concat(props.Cast<MemberInfo>())
-                .Select(member => Tuple.Create(member.GetSerializationName(serializatioNameFormat), member))
-                .OrderBy(info => info.Item1)
-                .ToList()
-                .AsReadOnly();
+            var allMembers = fields.Cast<MemberInfo>().Concat(props.Cast<MemberInfo>()).ToList();
+            var hidden = new List<MemberInfo>();
+            foreach(var members in allMembers.GroupBy(g => g.Name))
+            {
+                if (members.Count() == 1) continue;
+
+                var paths = new Dictionary<MemberInfo, int>();
+
+                foreach(var member in members)
+                {
+                    var path = new Stack<Type>();
+                    var cur = member.DeclaringType;
+                    while(cur != null)
+                    {
+                        path.Push(cur);
+                        cur = cur.BaseType();
+                    }
+
+                    paths[member] = path.Count;
+                }
+
+                var keep = paths.OrderByDescending(kv => kv.Value).First().Key;
+
+                hidden.AddRange(paths.Keys.Except(new[] { keep }));
+            }
+
+            var withoutHidden = allMembers.Except(hidden);
+
+            var setters = new Dictionary<string, List<MemberInfo>>();
+
+            foreach (var member in withoutHidden)
+            {
+                var name = member.GetSerializationName(serializationNameFormat);
+                List<MemberInfo> members;
+                if (!setters.TryGetValue(name, out members))
+                {
+                    setters[name] = members = new List<MemberInfo>();
+                }
+
+                members.Add(member);
+            }
+
+            var ret =
+                setters
+                    .Select(kv => Tuple.Create(kv.Key, kv.Value.ToArray()))
+                    .OrderBy(t => t.Item1)
+                    .ToList()
+                    .AsReadOnly();
+
+            return ret;
         }
 
         private static Func<TextReader, int> CreateFindMember(IEnumerable<string> names)
@@ -90,7 +133,7 @@ namespace Jil.Deserialize
             return _findMemberThunkReader(ref reader);
         }
 
-        public static Dictionary<string, MemberInfo> GetSetters()
+        public static Dictionary<string, MemberInfo[]> GetSetters()
         {
             return _nameOrderedSetters.ToDictionary(m => m.Item1, m => m.Item2);
         }

@@ -167,7 +167,19 @@ namespace Jil.Deserialize
         {
             var chars =
                 nameValues
-                .GroupBy(nv => pos >= nv.Name.Length ? -1 : nv.Name[pos])
+                .GroupBy(
+                    nv =>
+                    {
+                        // we're off the end, group by something that can't be a real char
+                        if (pos >= nv.Name.Length) return -1;
+
+                        var c = nv.Name[pos];
+                        if (d.CaseSensitive) return c;
+
+                        // if we're case sensitive, group by the char with no regard to case
+                        return char.ToLowerInvariant(c);
+                    }
+                )
                 .ToList();
 
             var namesToFinish = new List<Tuple<char, Label>>();
@@ -179,7 +191,7 @@ namespace Jil.Deserialize
                 {
                     if (charGroup.Count() != 1)
                     {
-                        throw new ApplicationException("");
+                        throw new ConstructionException("Couldn't build parsing automata, found duplicate terminals for " + string.Join(", ", charGroup.Select(c => c.Name)));
                     }
 
                     var completeName = d.Emit.DefineLabel("complete_" + items[0].Name);
@@ -386,7 +398,7 @@ namespace Jil.Deserialize
             var ch = emit.DeclareLocal(typeof(int), "ch");
             var failure = emit.DefineLabel("failure");
 
-            var cons = typeof(DeserializationException).GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic, null, new[] { typeof(string), readerType, typeof(bool) }, null);
+            var cons = typeof(DeserializationException).GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic, new[] { typeof(string), readerType, typeof(bool) });
 
             if (defaultValue == null)
             {
@@ -421,10 +433,13 @@ namespace Jil.Deserialize
                         emit.Call(Helper.GetConsume(readerType));
 
                         // strip of the ? if it exists
-                        var type = typeof(T);
+                        var type = defaultValue.GetType();
                         type = Nullable.GetUnderlyingType(type) ?? type;
 
-                        Utils.LoadConstantOfType(emit, defaultValue, type);
+                        if(!Utils.LoadConstantOfType(emit, defaultValue, type))
+                        {
+                            throw new Exception("Couldn't load constant for " + type.Name);
+                        }
 
                         emit.Return();
                     }
