@@ -33,7 +33,7 @@ namespace Es.Serializer
 
     public static class MemoryStreamFactory
     {
-        public static bool UseRecyclableMemoryStream { get; set; }
+        public static bool UseRecyclableMemoryStream { get; set; } = true;
 
         public static RecyclableMemoryStreamManager RecyclableInstance = new RecyclableMemoryStreamManager();
 
