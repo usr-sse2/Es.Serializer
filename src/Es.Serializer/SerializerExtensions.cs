@@ -90,5 +90,27 @@ namespace Es.Serializer
         public static T DeepClone<T>(this T obj) {
             return (T)XmlSerializer.Instance.DeepClone(obj);
         }
+
+        /// <summary>
+        /// Serialize To Xml
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        public static string ToXml<T>(this T obj)
+        {
+            return XmlSerializer.Instance.SerializeToString(obj);
+        }
+
+        /// <summary>
+        /// Deserialize From Xml
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="xml"></param>
+        /// <returns></returns>
+        public static T FromXml<T>(this string xml)
+        {
+            return XmlSerializer.Instance.DeserializeFromString<T>(xml);
+        }
     }
 }
