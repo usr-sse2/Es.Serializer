@@ -25,9 +25,7 @@ namespace Es.Serializer
     public sealed class SerializerFactory
     {
         private static Dictionary<string, ObjectSerializerBase> _objectSerializerCache;
-
-        private static XmlSerializer _xml;
-
+        
         private static ObjectSerializerBase _default;
 
 #if NETFULL || NETSTANDARD2_0
@@ -65,10 +63,9 @@ namespace Es.Serializer
             _soap = new SoapSerializer();
             _objectSerializerCache["soap"] = _soap;
 #endif
-            _xml = new XmlSerializer();
-            _objectSerializerCache["xml"] = _xml;
+            _objectSerializerCache["xml"] = XmlSerializer.Instance;
 
-            _default = _xml;
+            _default = XmlSerializer.Instance;
         }
 
         /// <summary>
