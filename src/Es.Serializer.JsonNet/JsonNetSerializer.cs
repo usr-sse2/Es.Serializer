@@ -12,6 +12,13 @@ namespace Es.Serializer
 #else
         private static readonly Formatting _format = Formatting.None;
 #endif
+
+        /// <summary>
+        /// JsonNetSerializer Instance
+        /// </summary>
+        public static JsonNetSerializer Instance = new JsonNetSerializer();
+
+
         private readonly JsonSerializerSettings _setting;
 
         public JsonNetSerializer(JsonSerializerSettings setting) {

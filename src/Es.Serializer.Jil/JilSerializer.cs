@@ -7,6 +7,11 @@ namespace Es.Serializer
     {
         private Jil.Options _options;
 
+        /// <summary>
+        /// JilSerializer Instance
+        /// </summary>
+        public static JilSerializer Instance = new JilSerializer();
+
         public JilSerializer(Jil.Options options) {
             _options = options;
         }

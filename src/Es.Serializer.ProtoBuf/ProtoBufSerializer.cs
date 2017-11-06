@@ -6,6 +6,11 @@ namespace Es.Serializer
 {
     public class ProtoBufSerializer : ObjectSerializerBase
     {
+        /// <summary>
+        /// ProtoBufSerializer Instance
+        /// </summary>
+        public static ProtoBufSerializer Instance = new ProtoBufSerializer();
+
         public override void Serialize(object value, Stream output) {
             RuntimeTypeModel.Default.Serialize(output, value);
         }

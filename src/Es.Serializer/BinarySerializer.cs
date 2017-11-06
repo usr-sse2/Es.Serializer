@@ -79,7 +79,7 @@ namespace Es.Serializer
         public override object DeserializeFromString(string serializedText, Type type)
         {
             var data = FromHex(serializedText);
-            using (MemoryStream mem = new MemoryStream(data))
+            using (MemoryStream mem = MemoryStreamFactory.GetStream(data))
             {
                 return Deserialize(mem, type);
             }

@@ -24,6 +24,7 @@ namespace Es.Serializer
     /// </summary>
     public class NETSerializer : ObjectSerializerBase
     {
+
         /// <summary>
         /// The _serializer
         /// </summary>

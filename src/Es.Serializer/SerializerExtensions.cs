@@ -88,8 +88,7 @@ namespace Es.Serializer
         /// <param name="obj">The object.</param>
         /// <returns>T.</returns>
         public static T DeepClone<T>(this T obj) {
-            var serializer = SerializerFactory.Get("xml");
-            return (T)serializer.DeepClone(obj);
+            return (T)XmlSerializer.Instance.DeepClone(obj);
         }
     }
 }
