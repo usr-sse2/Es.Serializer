@@ -25,6 +25,11 @@ namespace Es.Serializer
     public class DataContractSerializer : ObjectSerializerBase
     {
         /// <summary>
+        /// DataContractSerializer Instance
+        /// </summary>
+        public static DataContractSerializer Instance = new DataContractSerializer();
+
+        /// <summary>
         /// Serializes the specified value.
         /// </summary>
         /// <param name="value">The value.</param>
@@ -54,7 +59,7 @@ namespace Es.Serializer
         /// <returns>System.String.</returns>
         public override string SerializeToString(object value)
         {
-            using (MemoryStream mem = new MemoryStream())
+            using (MemoryStream mem = MemoryStreamFactory.GetStream())
             {
                 Serialize(value, mem);
                 return Encoding.GetString(mem.ToArray());
@@ -70,7 +75,7 @@ namespace Es.Serializer
         public override object DeserializeFromString(string serializedText, Type type)
         {
             var data = Encoding.GetBytes(serializedText);
-            using (MemoryStream mem = new MemoryStream(data))
+            using (MemoryStream mem = MemoryStreamFactory.GetStream(data))
             {
                 return Deserialize(mem, type);
             }

@@ -13,7 +13,6 @@
  * ---------------------------------------------------------------------------
  * */
 
-#if NETFULL || NETSTANDARD2_0
 using System;
 using System.IO;
 using System.Runtime.Serialization;
@@ -26,6 +25,11 @@ namespace Es.Serializer
     /// </summary>
     public class BinarySerializer : ObjectSerializerBase
     {
+        /// <summary>
+        /// BinarySerializer Instance
+        /// </summary>
+        public static BinarySerializer Instance = new BinarySerializer();
+
         /// <summary>
         /// The binary formatter
         /// </summary>
@@ -59,7 +63,7 @@ namespace Es.Serializer
         /// <returns>System.String.</returns>
         public override string SerializeToString(object value)
         {
-            using (MemoryStream mem = new MemoryStream())
+            using (MemoryStream mem = MemoryStreamFactory.GetStream())
             {
                 Serialize(value, mem);
                 return ToHex(mem.ToArray());
@@ -104,4 +108,3 @@ namespace Es.Serializer
         }
     }
 }
-#endif

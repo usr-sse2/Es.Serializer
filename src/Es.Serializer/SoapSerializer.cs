@@ -28,6 +28,11 @@ namespace Es.Serializer
     public class SoapSerializer : ObjectSerializerBase
     {
         /// <summary>
+        /// SoapSerializer Instance
+        /// </summary>
+        public static SoapSerializer Instance = new SoapSerializer();
+
+        /// <summary>
         /// The binary formatter
         /// </summary>
         private readonly IFormatter binaryFormatter = new SoapFormatter();
@@ -57,7 +62,7 @@ namespace Es.Serializer
         /// <param name="value">The value.</param>
         /// <returns>System.String.</returns>
         public override string SerializeToString(object value) {
-            using (MemoryStream mem = new MemoryStream()) {
+            using (MemoryStream mem = MemoryStreamFactory.GetStream()) {
                 Serialize(value, mem);
                 return Encoding.GetString(mem.ToArray());
             }
@@ -71,7 +76,7 @@ namespace Es.Serializer
         /// <returns>System.Object.</returns>
         public override object DeserializeFromString(string serializedText, Type type) {
             var data = Encoding.GetBytes(serializedText);
-            using (MemoryStream mem = new MemoryStream(data)) {
+            using (MemoryStream mem = MemoryStreamFactory.GetStream(data)) {
                 return Deserialize(mem, type);
             }
         }

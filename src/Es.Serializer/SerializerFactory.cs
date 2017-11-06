@@ -28,18 +28,6 @@ namespace Es.Serializer
         
         private static ObjectSerializerBase _default;
 
-#if NETFULL || NETSTANDARD2_0
-
-        private static DataContractSerializer _dataContract;
-
-        private static BinarySerializer _binary;
-
-#endif
-
-#if NETFULL
-
-        private static SoapSerializer _soap;
-#endif
 
         /// <summary>
         /// Initializes static members of the <see cref="SerializerFactory"/> class.
@@ -49,19 +37,13 @@ namespace Es.Serializer
             _objectSerializerCache = new Dictionary<string, ObjectSerializerBase>(StringComparer.OrdinalIgnoreCase);
 
 #if NETFULL || NETSTANDARD2_0
-            _binary = new BinarySerializer();
-
-            _objectSerializerCache["binary"] = _binary;
-
-            _dataContract = new DataContractSerializer();
-
-            _objectSerializerCache["DataContract"] = _dataContract;
-            _objectSerializerCache["dc"] = _dataContract;
+            _objectSerializerCache["binary"] = BinarySerializer.Instance;          
+            _objectSerializerCache["DataContract"] = DataContractSerializer.Instance;
+            _objectSerializerCache["dc"] = DataContractSerializer.Instance;
 #endif
 
 #if NETFULL
-            _soap = new SoapSerializer();
-            _objectSerializerCache["soap"] = _soap;
+            _objectSerializerCache["soap"] = SoapSerializer.Instance;
 #endif
             _objectSerializerCache["xml"] = XmlSerializer.Instance;
 
