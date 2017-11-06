@@ -63,7 +63,7 @@ namespace Es.Serializer
         /// <param name="value">The value.</param>
         /// <returns>System.String.</returns>
         public override string SerializeToString(object value) {
-            using (MemoryStream mem = new MemoryStream()) {
+            using (MemoryStream mem = MemoryStreamFactory.GetStream()) {
                 Serialize(value, mem);
                 return ToHex(mem.ToArray());
             }
@@ -77,7 +77,7 @@ namespace Es.Serializer
         /// <returns>System.Object.</returns>
         public override object DeserializeFromString(string serializedText, Type type) {
             var data = FromHex(serializedText);
-            using (MemoryStream mem = new MemoryStream(data)) {
+            using (MemoryStream mem = MemoryStreamFactory.GetStream(data)) {
                 return Deserialize(mem, type);
             }
         }

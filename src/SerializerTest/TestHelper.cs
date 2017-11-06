@@ -1,10 +1,14 @@
 ﻿using System;
+using Es.Serializer;
 
 namespace SerializerTest
 {
     public class TestHelper
     {
         public static Foo GetFoo() {
+
+            MemoryStreamFactory.UseRecyclableMemoryStream = true;
+
             return new Foo
             {
                 Id = 1,

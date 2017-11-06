@@ -9,6 +9,9 @@ namespace PerformanceTest
     public class Program
     {
         public static void Main(string[] args) {
+
+            MemoryStreamFactory.UseRecyclableMemoryStream = true;
+
 #if NETFULL
             
             NetSerializer.Serializer instance = new NetSerializer.Serializer(new[] { typeof(Foo), typeof(SerializerWrapper) });

@@ -56,14 +56,14 @@ namespace PerformanceTest
 
             CompareSerializers(foo, runs);
 
-            Console.WriteLine("single\r\n" + string.Join("\n", Enumerable.Range(0, serializer.Count).Select(s => "{" + s + "}")),
+            Console.WriteLine("------------------- single\r\n" + string.Join("\n", Enumerable.Range(0, serializer.Count).Select(s => "{" + s + "}")),
                 serializer.Select(s => s.Key + ":" + s.Value.Score.ToString()).ToArray());
 
             var wrapper = new SerializerWrapper(foo);
 
             CompareSerializers(wrapper, runs);
 
-            Console.WriteLine("wrapper\r\n" + string.Join("\n", Enumerable.Range(0, serializer.Count).Select(s => "{" + s + "}")),
+            Console.WriteLine("------------------- wrapper\r\n" + string.Join("\n", Enumerable.Range(0, serializer.Count).Select(s => "{" + s + "}")),
               serializer.Select(s => s.Key + ":" + s.Value.Score.ToString()).ToArray());
         }
 
@@ -78,14 +78,14 @@ namespace PerformanceTest
 
             CompareDeserializes(foo, runs);
 
-            Console.WriteLine("single\r\n" + string.Join("\n", Enumerable.Range(0, serializer.Count).Select(s => "{" + s + "}")),
+            Console.WriteLine("------------------- single\r\n" + string.Join("\n", Enumerable.Range(0, serializer.Count).Select(s => "{" + s + "}")),
              serializer.Select(s => s.Key + ":" + s.Value.Score.ToString()).ToArray());
 
             var wrapper = new SerializerWrapper(foo);
 
             CompareDeserializes(wrapper, runs);
 
-            Console.WriteLine("wrapper\r\n" + string.Join("\n", Enumerable.Range(0, serializer.Count).Select(s => "{" + s + "}")),
+            Console.WriteLine("------------------- wrapper\r\n" + string.Join("\n", Enumerable.Range(0, serializer.Count).Select(s => "{" + s + "}")),
              serializer.Select(s => s.Key + ":" + s.Value.Score.ToString()).ToArray());
         }
 
