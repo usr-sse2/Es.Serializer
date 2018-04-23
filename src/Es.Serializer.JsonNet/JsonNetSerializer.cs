@@ -18,28 +18,35 @@ namespace Es.Serializer
         /// </summary>
         public static JsonNetSerializer Instance = new JsonNetSerializer();
 
-
         private readonly JsonSerializerSettings _setting;
 
-        public JsonNetSerializer(JsonSerializerSettings setting) {
+        public JsonNetSerializer() : this(_format)
+        {
+        }
+
+        public JsonNetSerializer(JsonSerializerSettings setting)
+        {
             _setting = setting;
         }
 
-        public JsonNetSerializer() : this(new JsonSerializerSettings
+        public JsonNetSerializer(Formatting format = Formatting.None) : this(new JsonSerializerSettings
         {
             Converters = new JsonConverter[] { new IsoDateTimeConverter { DateTimeFormat = "yyyy'-'MM'-'dd' 'HH':'mm':'ss" } },
             ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
             NullValueHandling = NullValueHandling.Ignore,
-            Formatting = _format
-        }) {
+            Formatting = format
+        })
+        {
         }
 
-        protected override void SerializeCore(object value, TextWriter writer) {
+        protected override void SerializeCore(object value, TextWriter writer)
+        {
             JsonSerializer serializer = JsonSerializer.Create(_setting);
             serializer.Serialize(writer, value);
         }
 
-        protected override object DeserializeCore(TextReader reader, Type type) {
+        protected override object DeserializeCore(TextReader reader, Type type)
+        {
             JsonSerializer serializer = JsonSerializer.Create();
             return serializer.Deserialize(reader, type);
         }
