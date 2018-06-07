@@ -24,6 +24,12 @@ namespace Es.Serializer
     /// </summary>
     public abstract class ObjectSerializerBase : IObjectSerializer, IStringSerializer
     {
+        private static readonly byte[] HexTable =
+        {
+            (byte)'0', (byte)'1', (byte)'2', (byte)'3', (byte)'4', (byte)'5', (byte)'6', (byte)'7',
+            (byte)'8', (byte)'9', (byte)'a', (byte)'b', (byte)'c', (byte)'d', (byte)'e', (byte)'f'
+        };
+
         /// <summary>
         /// The buffer size
         /// </summary>
@@ -173,7 +179,17 @@ namespace Es.Serializer
         /// <returns>System.String.</returns>
         protected static string ToHex(byte[] data)
         {
-            return BitConverter.ToString(data).Replace("-", string.Empty);
+            var length = data.Length;
+
+            var hex = new char[length * 2];
+
+            for (int i = 0, j = 0; i < length; i++, j += 2)
+            {
+                hex[j] = (char)HexTable[(data[i] >> 4) & 0x0f];
+                hex[j + 1] = (char)HexTable[data[i] & 0x0f];
+            }
+
+            return new string(hex);
         }
 
 
@@ -185,12 +201,41 @@ namespace Es.Serializer
         protected static byte[] FromHex(string hex)
         {
             if (string.IsNullOrEmpty(hex)) return new byte[0];
-            if ((hex.Length % 2) != 0)
-                hex += " ";
-            byte[] returnBytes = new byte[hex.Length / 2];
-            for (int i = 0; i < returnBytes.Length; i++)
-                returnBytes[i] = Convert.ToByte(hex.Substring(i * 2, 2), 16);
-            return returnBytes;
+
+            var length = hex.Length;
+
+            var data = new byte[length / 2];
+
+            int off = 0;
+            for (int read_index = 0; read_index < length; read_index += 2)
+            {
+                byte upper = FromCharacterToByte((byte)hex[read_index], read_index, 4);
+                byte lower = FromCharacterToByte((byte)hex[read_index + 1], read_index + 1);
+
+                data[off++] = (byte)(upper | lower);
+            }
+
+            return data;
+        }
+
+        private static byte FromCharacterToByte(byte value, int index, int shift = 0)
+        {
+            if (((0x40 < value) && (0x47 > value)) || ((0x60 < value) && (0x67 > value)))
+            {
+                if (0x40 == (0x40 & value))
+                {
+                    if (0x20 == (0x20 & value))
+                        value = (byte)(((value + 0xA) - 0x61) << shift);
+                    else
+                        value = (byte)(((value + 0xA) - 0x41) << shift);
+                }
+            }
+            else if ((0x29 < value) && (0x40 > value))
+                value = (byte)((value - 0x30) << shift);
+            else
+                throw new InvalidOperationException(String.Format("Character '{0}' at index '{1}' is not valid alphanumeric character.", (char)value, index));
+
+            return value;
         }
     }
 }
