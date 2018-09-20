@@ -4,6 +4,17 @@
 
 A serialized factory provider, support a variety of serialization.
 
+Packages & Status
+---
+
+Package  | NuGet         |
+-------- | :------------ |
+|**Es.Serializer**|[![NuGet package](https://buildstats.info/nuget/Es.Serializer)](https://www.nuget.org/packages/Es.Serializer)
+|**Es.Serializer.Jil**|[![NuGet package](https://buildstats.info/nuget/Es.Serializer.Jil)](https://www.nuget.org/packages/Es.Serializer.Jil)
+|**Es.Serializer.JsonNet**|[![NuGNuGet packageet](https://buildstats.info/nuget/Es.Serializer.JsonNet)](https://www.nuget.org/packages/Es.Serializer.JsonNet)
+|**Es.Serializer.NetSerializer**|[![NuGet package](https://buildstats.info/nuget/Es.Serializer.NetSerializer)](https://www.nuget.org/packages/Es.Serializer.NetSerializer)
+|**Es.Serializer.ProtoBuf**|[![NuGet package](https://buildstats.info/nuget/Es.Serializer.ProtoBuf)](https://www.nuget.org/packages/Es.Serializer.ProtoBuf)
+
 ## Usage
 
 
