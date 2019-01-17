@@ -74,7 +74,7 @@ namespace Es.Serializer
         /// <param name="obj">The object.</param>
         /// <returns>T.</returns>
         public static T DeepClone<T>(this ObjectSerializerBase self, T obj) {
-            using (MemoryStream ms = MemoryStreamFactory.GetStream()) {
+            using (MemoryStream ms = new MemoryStream()) {
                 self.Serialize(obj, ms);
                 ms.Seek(0, SeekOrigin.Begin);
                 return self.Deserialize<T>(ms);

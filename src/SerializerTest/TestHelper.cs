@@ -7,8 +7,6 @@ namespace SerializerTest
     {
         public static Foo GetFoo() {
 
-            MemoryStreamFactory.UseRecyclableMemoryStream = true;
-
             return new Foo
             {
                 Id = 1,

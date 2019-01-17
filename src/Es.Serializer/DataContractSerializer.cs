@@ -59,7 +59,7 @@ namespace Es.Serializer
         /// <returns>System.String.</returns>
         public override string SerializeToString(object value)
         {
-            using (MemoryStream mem = MemoryStreamFactory.GetStream())
+            using (MemoryStream mem = new MemoryStream())
             {
                 Serialize(value, mem);
                 return Encoding.GetString(mem.ToArray());
@@ -75,7 +75,7 @@ namespace Es.Serializer
         public override object DeserializeFromString(string serializedText, Type type)
         {
             var data = Encoding.GetBytes(serializedText);
-            using (MemoryStream mem = MemoryStreamFactory.GetStream(data))
+            using (MemoryStream mem = new MemoryStream(data))
             {
                 return Deserialize(mem, type);
             }

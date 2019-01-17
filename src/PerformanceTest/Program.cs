@@ -9,8 +9,7 @@ namespace PerformanceTest
     public class Program
     {
         public static void Main(string[] args) {
-
-            MemoryStreamFactory.UseRecyclableMemoryStream = true;
+            
 
 #if NETFULL
             

@@ -90,7 +90,7 @@ namespace Es.Serializer
         /// <returns>System.Object.</returns>
         public virtual object Deserialize(byte[] data, Type type)
         {
-            using (var mem = MemoryStreamFactory.GetStream(data))
+            using (var mem = new MemoryStream(data))
             {
                 return Deserialize(mem, type);
             }
@@ -128,7 +128,7 @@ namespace Es.Serializer
         /// <param name="output">The output.</param>
         public virtual void Serialize(object value, out byte[] output)
         {
-            using (var mem = MemoryStreamFactory.GetStream())
+            using (var mem = new MemoryStream())
             {
                 Serialize(value, mem);
                 output = mem.ToArray();
@@ -142,7 +142,7 @@ namespace Es.Serializer
         /// <returns>System.String.</returns>
         public virtual string SerializeToString(object value)
         {
-            using (var ms = MemoryStreamFactory.GetStream())
+            using (var ms = new MemoryStream())
             {
                 using (StreamWriter writer = new StreamWriter(ms))
                 {
