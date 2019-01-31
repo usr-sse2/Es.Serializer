@@ -38,7 +38,7 @@ var foo = bs.Deserialize(sr, typeof(Foo));
 
 Stream output = new MemoryStream();
 
-SerializerFactory.Default.Serialize(obj,outbut);
+SerializerFactory.Default.Serialize(obj,output);
 
 output.Position = 0;
 
@@ -50,7 +50,7 @@ var foo = bs.Deserialize(output, typeof(Foo));
 
 ```C#
 
-var output = SerializerFactory.Default.SerializeToString(obj,outbut);
+var output = SerializerFactory.Default.SerializeToString(obj,output);
 
 var foo = bs.DeserializeFromString<Foo>(output);
 
